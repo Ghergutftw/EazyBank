@@ -29,3 +29,5 @@ Spring Boot new stuff - The document is very well made
         - The file gets the @ConfigurationProperties(prefix = "accounts")
         - And the main class gets @EnableConfigurationProperties(value = {AccountsContactInfoDto.class})
         - And you use that Record inside the class by injecting it in the constructor
+
+- To see al the mappings in a spring boot app you go to http://localhost:8071/actuator/mappings

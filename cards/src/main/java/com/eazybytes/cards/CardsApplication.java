@@ -23,13 +23,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 				description = "EazyBank Cards microservice REST API Documentation",
 				version = "v1",
 				contact = @Contact(
-						name = "Madan Reddy",
-						email = "tutor@eazybytes.com",
-						url = "https://www.eazybytes.com"
+						name = "GherMa",
+						email = "tutor@gmail.com.com",
+						url = "https://github.com/Ghergutftw"
 				),
 				license = @License(
 						name = "Apache 2.0",
-						url = "https://www.eazybytes.com"
+						url = "https://github.com/Ghergutftw"
 				)
 		),
 		externalDocs = @ExternalDocumentation(

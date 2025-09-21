@@ -1,6 +1,13 @@
 server:
   port: 8080
 spring:
+  config:
+    import: configserver:http://localhost:8071/
+  application:
+#    Needs to have the same name as the profiles inside the config server
+    name: accounts
+  profiles:
+    active: prod
   datasource:
     url: jdbc:h2:mem:testdb
     driverClassName: org.h2.Driver
@@ -14,23 +21,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  config:
-    import:
-      - "application_qa.yml"
-      - "application_prod.yml"
-  profiles:
-    active:
-      - "qa"
-
-
-build:
-  version: "3.0"
-
-accounts:
-  message: "Welcome to EazyBank accounts related local APIs "
-  contactDetails:
-    name: "John Doe - Developer"
-    email: "john@eazybank.com"
-  onCallSupport:
-    - (555) 555-1234
-    - (555) 523-1345
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
