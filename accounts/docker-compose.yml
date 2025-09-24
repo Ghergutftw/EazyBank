@@ -1,6 +1,6 @@
 services:
   accounts:
-    image: "ghergutmadalin/accounts:s4"
+    image: "ghergutmadalinaccounts:s4"
     container_name: accounts-ms
     ports:
       - "8080:8080"
@@ -11,7 +11,7 @@ services:
     networks:
       - eazybank
   loans:
-    image: "ghergutmadalin/loans:s4"
+    image: "ghergutmadalinloans:s4"
     container_name: loans-ms
     ports:
       - "8090:8090"
@@ -22,7 +22,7 @@ services:
     networks:
       - eazybank
   cards:
-    image: "ghergutmadalin/cards:s4"
+    image: "ghergutmadalincards:s4"
     container_name: cards-ms
     ports:
       - "9000:9000"

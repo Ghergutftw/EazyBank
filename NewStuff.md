@@ -31,3 +31,4 @@ Spring Boot new stuff - The document is very well made
         - And you use that Record inside the class by injecting it in the constructor
 
 - To see al the mappings in a spring boot app you go to http://localhost:8071/actuator/mappings
+

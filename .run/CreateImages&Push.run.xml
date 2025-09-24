@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CreateImages&amp;Push" type="CompoundRunConfigurationType">
+    <toRun name="accounts [jib:build]" type="MavenRunConfiguration" />
+    <toRun name="cards [jib:build]" type="MavenRunConfiguration" />
+    <toRun name="configserver [jib:build]" type="MavenRunConfiguration" />
+    <toRun name="loans [jib:build]" type="MavenRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>

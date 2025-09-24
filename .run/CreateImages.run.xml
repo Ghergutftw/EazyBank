@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="CreateImages" type="CompoundRunConfigurationType">
-    <toRun name="accounts [spring-boot:build-image]" type="MavenRunConfiguration" />
-    <toRun name="cards [spring-boot:build-image]" type="MavenRunConfiguration" />
-    <toRun name="loans [spring-boot:build-image]" type="MavenRunConfiguration" />
-    <method v="2" />
-  </configuration>
-</component>

@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # EazyBank Config Server
+  configserver:
+    build:
+      context: ../configserver
+      dockerfile: ../configserver/Dockerfile
+    container_name: eazybank-configserver
+    ports:
+      - "8071:8071"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - eazybank-network
+
+  # EazyBank Accounts Service
+  accounts:
+    build:
+      context: ../accounts
+      dockerfile: ../accounts/Dockerfile
+    container_name: eazybank-accounts
+    ports:
+      - "8080:8080"
+    depends_on:
+      - configserver
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://configserver:8071/
+      - SPRING_CLOUD_CONFIG_LABEL=docker
+      - SPRING_CLOUD_CONFIG_RETRY_MAX_ATTEMPTS=20
+      - SPRING_CLOUD_CONFIG_RETRY_INITIAL_INTERVAL=3000
+      - SPRING_CLOUD_CONFIG_RETRY_MAX_INTERVAL=10000
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=false
+      - app.maintenance=false
+    networks:
+      - eazybank-network
+
+  # EazyBank Cards Service
+  cards:
+    build:
+      context: ../cards
+      dockerfile: ../cards/Dockerfile
+    container_name: eazybank-cards
+    ports:
+      - "9000:9000"
+    depends_on:
+      - configserver
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://configserver:8071/
+      - SPRING_CLOUD_CONFIG_LABEL=docker
+      - SPRING_CLOUD_CONFIG_RETRY_MAX_ATTEMPTS=20
+      - SPRING_CLOUD_CONFIG_RETRY_INITIAL_INTERVAL=3000
+      - SPRING_CLOUD_CONFIG_RETRY_MAX_INTERVAL=10000
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=false
+      - app.maintenance=false
+    networks:
+      - eazybank-network
+
+  # EazyBank Loans Service
+  loans:
+    build:
+      context: ../loans
+      dockerfile: ../loans/Dockerfile
+    container_name: eazybank-loans
+    ports:
+      - "8090:8090"
+    depends_on:
+      - configserver
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://configserver:8071/
+      - SPRING_CLOUD_CONFIG_LABEL=docker
+      - SPRING_CLOUD_CONFIG_RETRY_MAX_ATTEMPTS=20
+      - SPRING_CLOUD_CONFIG_RETRY_INITIAL_INTERVAL=3000
+      - SPRING_CLOUD_CONFIG_RETRY_MAX_INTERVAL=10000
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=false
+      - app.maintenance=false
+    networks:
+      - eazybank-network
+
+  # EazyBank Status Dashboard (Angular Frontend)
+  account-status:
+    build:
+      context: ./account-status
+      dockerfile: Dockerfile
+    container_name: eazybank-dashboard
+    ports:
+      - "4200:80"
+    depends_on:
+      - accounts
+      - cards
+      - loans
+    networks:
+      - eazybank-network
+
+networks:
+  eazybank-network:
+    driver: bridge
+    name: eazybank-network
+
+volumes:
+  accounts_data:
+  cards_data:
+  loans_data:

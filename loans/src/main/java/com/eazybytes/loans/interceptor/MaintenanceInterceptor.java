@@ -1,4 +1,4 @@
-package com.eazybytes.accounts.interceptor;
+package com.eazybytes.loans.interceptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -30,9 +30,9 @@ public class MaintenanceInterceptor implements HandlerInterceptor {
         // Only log when maintenance state changes or when maintenance is enabled
         if (isMaintenanceMode != lastMaintenanceState || (isMaintenanceMode && !hasLoggedMaintenanceState)) {
             if (isMaintenanceMode) {
-                System.out.println("🔧 ACCOUNTS SERVICE: Maintenance mode ENABLED");
+                System.out.println("🔧 LOANS SERVICE: Maintenance mode ENABLED");
             } else {
-                System.out.println("✅ ACCOUNTS SERVICE: Maintenance mode DISABLED");
+                System.out.println("✅ LOANS SERVICE: Maintenance mode DISABLED");
             }
             lastMaintenanceState = isMaintenanceMode;
             hasLoggedMaintenanceState = true;
@@ -47,10 +47,10 @@ public class MaintenanceInterceptor implements HandlerInterceptor {
                 """
                 {
                   "status": "SERVICE_UNAVAILABLE",
-                  "message": "EazyBank Accounts Service is currently under maintenance",
+                  "message": "EazyBank Loans Service is currently under maintenance",
                   "details": "We are performing scheduled maintenance to improve our services. Please try again later.",
                   "timestamp": "%s",
-                  "service": "accounts-service",
+                  "service": "loans-service",
                   "supportContact": "support@eazybank.com",
                   "maintenanceValue": "%s"
                 }""", timestamp, maintenanceMode

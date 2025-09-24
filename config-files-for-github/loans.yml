@@ -5,7 +5,7 @@ spring:
   application:
     name: loans
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:loansdb
     driverClassName: org.h2.Driver
     username: sa
     password: ''
@@ -17,11 +17,11 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  rabbitmq:
-    host: rabbitmq
-    port: 5672
-    username: guest
-    password: guest
+
+# Maintenance mode property
+app:
+  maintenance: false
+
 management:
   endpoints:
     web:
@@ -29,5 +29,21 @@ management:
         include: "*"
   endpoint:
     health:
-      probes:
-        enabled: true
+      show-details: always
+    shutdown:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: "loans"
+    description: "Eazy Bank Loans Application"
+    version: "1.0.0"
+
+logging:
+  level:
+    com:
+      eazybytes:
+        loans: DEBUG

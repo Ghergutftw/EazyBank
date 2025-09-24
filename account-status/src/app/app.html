@@ -1,0 +1,190 @@
+<!-- Maintenance/Issues Page -->
+@if (anyServiceInMaintenance || allServicesStatus?.overallStatus !== 'operational') {
+  <div class="maintenance-container">
+    <div class="robot">
+      <div class="robot-body">
+        <div class="robot-head">
+          <div class="robot-eyes">
+            <div class="eye"></div>
+            <div class="eye"></div>
+          </div>
+        </div>
+        <div class="robot-arms">
+          <div class="arm left-arm">
+            <div class="wrench"></div>
+          </div>
+          <div class="arm right-arm">
+            <div class="wrench"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (allServicesStatus?.overallStatus === 'maintenance') {
+      <h1>🔧 System Under Maintenance</h1>
+      <p>All EazyBank services are currently under maintenance</p>
+    } @else if (allServicesStatus?.overallStatus === 'partial') {
+      <h1>⚠️ Service Issues Detected</h1>
+      <p>Some EazyBank services are experiencing issues</p>
+    } @else {
+      <h1>🔧 Service Status Alert</h1>
+      <p>Checking EazyBank services status...</p>
+    }
+
+    <!-- Individual Service Status Cards -->
+    <div class="services-grid">
+      <!-- Accounts Service -->
+      <div class="service-card" [class]="getServiceStatusClass('accounts')">
+        <div class="service-header">
+          <span class="service-icon">{{ getServiceStatusIcon('accounts') }}</span>
+          <h3>Accounts Service</h3>
+          <span class="service-port">:8080</span>
+        </div>
+        <div class="service-status">
+          <p class="status-message">{{ getServiceStatus('accounts')?.message }}</p>
+          @if (getServiceStatus('accounts')?.isInMaintenance && getServiceStatus('accounts')?.maintenanceDetails) {
+            <div class="maintenance-details">
+              <p><strong>Details:</strong> {{ getServiceStatus('accounts')?.maintenanceDetails?.details }}</p>
+              @if (getMaintenanceTimestamp('accounts')) {
+                <p><strong>Since:</strong> {{ getMaintenanceTimestamp('accounts') }}</p>
+              }
+              <p><strong>Support:</strong>
+                <a [href]="'mailto:' + getSupportContact('accounts')">{{ getSupportContact('accounts') }}</a>
+              </p>
+            </div>
+          }
+        </div>
+        <button class="test-service-btn" (click)="testService('accounts')">Test Accounts</button>
+      </div>
+
+      <!-- Cards Service -->
+      <div class="service-card" [class]="getServiceStatusClass('cards')">
+        <div class="service-header">
+          <span class="service-icon">{{ getServiceStatusIcon('cards') }}</span>
+          <h3>Cards Service</h3>
+          <span class="service-port">:9000</span>
+        </div>
+        <div class="service-status">
+          <p class="status-message">{{ getServiceStatus('cards')?.message }}</p>
+          @if (getServiceStatus('cards')?.isInMaintenance && getServiceStatus('cards')?.maintenanceDetails) {
+            <div class="maintenance-details">
+              <p><strong>Details:</strong> {{ getServiceStatus('cards')?.maintenanceDetails?.details }}</p>
+              @if (getMaintenanceTimestamp('cards')) {
+                <p><strong>Since:</strong> {{ getMaintenanceTimestamp('cards') }}</p>
+              }
+              <p><strong>Support:</strong>
+                <a [href]="'mailto:' + getSupportContact('cards')">{{ getSupportContact('cards') }}</a>
+              </p>
+            </div>
+          }
+        </div>
+        <button class="test-service-btn" (click)="testService('cards')">Test Cards</button>
+      </div>
+
+      <!-- Loans Service -->
+      <div class="service-card" [class]="getServiceStatusClass('loans')">
+        <div class="service-header">
+          <span class="service-icon">{{ getServiceStatusIcon('loans') }}</span>
+          <h3>Loans Service</h3>
+          <span class="service-port">:8090</span>
+        </div>
+        <div class="service-status">
+          <p class="status-message">{{ getServiceStatus('loans')?.message }}</p>
+          @if (getServiceStatus('loans')?.isInMaintenance && getServiceStatus('loans')?.maintenanceDetails) {
+            <div class="maintenance-details">
+              <p><strong>Details:</strong> {{ getServiceStatus('loans')?.maintenanceDetails?.details }}</p>
+              @if (getMaintenanceTimestamp('loans')) {
+                <p><strong>Since:</strong> {{ getMaintenanceTimestamp('loans') }}</p>
+              }
+              <p><strong>Support:</strong>
+                <a [href]="'mailto:' + getSupportContact('loans')">{{ getSupportContact('loans') }}</a>
+              </p>
+            </div>
+          }
+        </div>
+        <button class="test-service-btn" (click)="testService('loans')">Test Loans</button>
+      </div>
+    </div>
+
+    <div class="checking-indicator">
+      <div class="spinner"></div>
+      <span>{{ statusMessage }}</span>
+    </div>
+
+    <div class="action-buttons">
+      <button class="retry-button" (click)="checkNow()">
+        🔄 Check All Services
+      </button>
+    </div>
+
+    @if (lastCheckTime) {
+      <div class="last-check">
+        Last checked: {{ lastCheckTime | date:'short' }}
+      </div>
+    }
+  </div>
+}
+
+<!-- All Services Operational Dashboard -->
+@if (!anyServiceInMaintenance && allServicesStatus?.overallStatus === 'operational') {
+  <div class="main-app">
+    <div class="dashboard">
+      <h1>🏦 EazyBank Services Dashboard</h1>
+
+      <div class="overall-status">
+        <span class="status-indicator operational"></span>
+        <span>All services are operational</span>
+      </div>
+
+      <!-- Services Overview Grid -->
+      <div class="services-overview">
+        <div class="service-overview-card accounts">
+          <div class="service-icon-large">🏛️</div>
+          <h3>Accounts Service</h3>
+          <span class="service-status-badge online">{{ getServiceStatusIcon('accounts') }} Online</span>
+          <p class="service-port">Port: 8080</p>
+          <button class="quick-test-btn" (click)="testService('accounts')">Quick Test</button>
+        </div>
+
+        <div class="service-overview-card cards">
+          <div class="service-icon-large">💳</div>
+          <h3>Cards Service</h3>
+          <span class="service-status-badge online">{{ getServiceStatusIcon('cards') }} Online</span>
+          <p class="service-port">Port: 9000</p>
+          <button class="quick-test-btn" (click)="testService('cards')">Quick Test</button>
+        </div>
+
+        <div class="service-overview-card loans">
+          <div class="service-icon-large">💰</div>
+          <h3>Loans Service</h3>
+          <span class="service-status-badge online">{{ getServiceStatusIcon('loans') }} Online</span>
+          <p class="service-port">Port: 8090</p>
+          <button class="quick-test-btn" (click)="testService('loans')">Quick Test</button>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button class="action-btn" (click)="checkNow()">
+          🔄 Refresh All Services
+        </button>
+      </div>
+
+      <div class="status-info">
+        <p><strong>Overall Status:</strong> {{ statusMessage }}</p>
+        @if (lastCheckTime) {
+          <p><strong>Last Check:</strong> {{ lastCheckTime | date:'short' }}</p>
+        }
+        @if (allServicesStatus) {
+          <div class="detailed-status">
+            <p><strong>Service Details:</strong></p>
+            <ul>
+              <li>Accounts: {{ allServicesStatus.accounts.message }}</li>
+              <li>Cards: {{ allServicesStatus.cards.message }}</li>
+              <li>Loans: {{ allServicesStatus.loans.message }}</li>
+            </ul>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
