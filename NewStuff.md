@@ -32,3 +32,6 @@ Spring Boot new stuff - The document is very well made
 
 - To see al the mappings in a spring boot app you go to http://localhost:8071/actuator/mappings
 
+- Profiling
+- Configuration Managment
+- Docker Compose DRY
