@@ -2,6 +2,7 @@
   <configuration default="false" name="EazyBank" type="CompoundRunConfigurationType">
     <toRun name="AccountsApplication" type="SpringBootApplicationConfigurationType" />
     <toRun name="CardsApplication" type="SpringBootApplicationConfigurationType" />
+    <toRun name="ConfigserverApplication" type="SpringBootApplicationConfigurationType" />
     <toRun name="LoansApplication" type="SpringBootApplicationConfigurationType" />
     <method v="2" />
   </configuration>

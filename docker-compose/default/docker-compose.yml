@@ -1,4 +1,34 @@
 services:
+  accountsdb:
+    container_name: accountsdb
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: accountsdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
+  loansdb:
+    container_name: loansdb
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_DATABASE: loansdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
+  cardsdb:
+    container_name: cardsdb
+    ports:
+      - 3308:3306
+    environment:
+      MYSQL_DATABASE: cardsdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
   rabbitmq:
     image: rabbitmq:3.13-management
     hostname: rabbitmq
@@ -37,12 +67,13 @@ services:
 
   accounts:
     image: ghergutmadalin/accounts:latest
-    pull_policy: always
     container_name: accounts-ms
     ports:
       - 8080:8080
     depends_on:
       configserver:
+        condition: service_healthy
+      accountsdb:
         condition: service_healthy
     extends:
       file: common-config.yml
@@ -56,6 +87,8 @@ services:
     depends_on:
       configserver:
         condition: service_healthy
+      loansdb:
+        condition: service_healthy
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -67,6 +100,8 @@ services:
       - 9000:9000
     depends_on:
       configserver:
+        condition: service_healthy
+      cardsdb:
         condition: service_healthy
     extends:
       file: common-config.yml

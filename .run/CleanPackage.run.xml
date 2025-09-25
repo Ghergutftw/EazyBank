@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CleanPackage" type="CompoundRunConfigurationType">
+    <toRun name="accounts [clean,package]" type="MavenRunConfiguration" />
+    <toRun name="cards [clean,package]" type="MavenRunConfiguration" />
+    <toRun name="configserver [clean,package]" type="MavenRunConfiguration" />
+    <toRun name="loans [clean,package]" type="MavenRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>
