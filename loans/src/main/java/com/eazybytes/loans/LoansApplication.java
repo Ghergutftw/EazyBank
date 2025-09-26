@@ -9,12 +9,11 @@ import io.swagger.v3.oas.annotations.info.License;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-/*@ComponentScans({ @ComponentScan("com.eazybytes.loans.controller") })
-@EnableJpaRepositories("com.eazybytes.loans.repository")
-@EntityScan("com.eazybytes.loans.model")*/
+@EnableDiscoveryClient
 @EnableJpaAuditing(auditorAwareRef = "auditAwareImpl")
 @EnableConfigurationProperties(value = {LoansContactInfoDto.class})
 @OpenAPIDefinition(
@@ -29,7 +28,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 				),
 				license = @License(
 						name = "Apache 2.0",
-						url = "https://github.com/Ghergutftw"
+						url = "https://www.apache.org/licenses/LICENSE-2.0"
 				)
 		),
 		externalDocs = @ExternalDocumentation(
@@ -42,4 +41,5 @@ public class LoansApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(LoansApplication.class, args);
 	}
+
 }

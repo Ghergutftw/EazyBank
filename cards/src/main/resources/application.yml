@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: cards
+  config:
+    import: configserver:http://configserver:8071/
   datasource:
     url: jdbc:mysql://cardsdb:3306/cardsdb
     username: root
@@ -17,12 +19,36 @@ spring:
     port: 5672
     username: guest
     password: guest
+
+
+
 management:
   endpoints:
     web:
       exposure:
         include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
   endpoint:
     health:
       probes:
         enabled: true
+
+eureka:
+  instance:
+    preferIpAddress: true
+    hostname: cards
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://eurekaserver:8761/eureka/
+
+info:
+  app:
+    name: "cards"
+    description: "EazyBank Cards Application"
+    version: "1.0.0"

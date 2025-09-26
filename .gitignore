@@ -10,3 +10,5 @@ target/
 *.iml
 *.ipr
 .DS_Store
+
+/config-files-for-github

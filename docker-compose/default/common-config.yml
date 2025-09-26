@@ -25,7 +25,6 @@ services:
           memory: 700m
 
   microservice-configserver-config:
-    image: mysql:8.0
     extends:
       service: microservice-base-config
     environment:

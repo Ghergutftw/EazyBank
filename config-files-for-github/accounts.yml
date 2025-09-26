@@ -1,14 +1,6 @@
 build:
   version: "3.0"
 
-cards:
-  message: "Welcome to EazyBank cards related DADA APIs "
-  contactDetails:
-    name: "Dragos Lech - Developer"
-    email: "dragos@eazybank.com"
-  onCallSupport:
-    - (412) 419-3491
-    - (915) 382-1932
     
 eureka:
   instance:
@@ -21,3 +13,12 @@ eureka:
       defaultZone: http://eurekaserver:8761/eureka/
     healthcheck:
       enabled: true
+
+accounts:
+  message: "Welcome to EazyBank accounts related docker APIs "
+  contactDetails:
+    name: "John Doe - Developer"
+    email: "john@eazybank.com"
+  onCallSupport:
+    - (555) 555-1234
+    - (555) 523-1345

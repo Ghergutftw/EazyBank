@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: accounts
+  config:
+    import: configserver:http://configserver:8071/
   datasource:
     url: jdbc:mysql://accountsdb:3306/accountsdb
     username: root
@@ -17,12 +19,43 @@ spring:
     port: 5672
     username: guest
     password: guest
+  profiles:
+    active: "default"
+
 management:
   endpoints:
     web:
       exposure:
         include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
   endpoint:
     health:
       probes:
         enabled: true
+    shutdown:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+
+eureka:
+  instance:
+    preferIpAddress: true
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:accounts}
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eurekaserver:8761/eureka/}
+    healthcheck:
+      enabled: true
+
+info:
+  app:
+    name: "accounts"
+    description: "EazyBank Accounts Application"
+    version: "1.0.0"
