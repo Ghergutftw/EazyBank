@@ -1,49 +1,23 @@
-server:
-  port: 8080
+build:
+  version: "3.0"
 
-spring:
-  application:
-    name: accounts
-  datasource:
-    url: jdbc:h2:mem:accountsdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password: ''
-  h2:
-    console:
+cards:
+  message: "Welcome to EazyBank cards related DADA APIs "
+  contactDetails:
+    name: "Dragos Lech - Developer"
+    email: "dragos@eazybank.com"
+  onCallSupport:
+    - (412) 419-3491
+    - (915) 382-1932
+    
+eureka:
+  instance:
+    preferIpAddress: true
+    hostname: accounts
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://eurekaserver:8761/eureka/
+    healthcheck:
       enabled: true
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-
-# Maintenance mode property
-app:
-  maintenance: false
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-    shutdown:
-      enabled: true
-  info:
-    env:
-      enabled: true
-
-info:
-  app:
-    name: "accounts"
-    description: "Eazy Bank Accounts Application"
-    version: "1.0.0"
-
-logging:
-  level:
-    com:
-      eazybytes:
-        accounts: DEBUG
