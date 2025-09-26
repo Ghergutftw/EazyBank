@@ -49,7 +49,7 @@ services:
   configserver:
     image: ghergutmadalin/configserver:latest
     pull_policy: always
-    container_name: configserver 
+    container_name: configserver
     ports:
       - 8071:8071
     depends_on:
@@ -67,7 +67,7 @@ services:
 
   eurekaserver:
     image: ghergutmadalin/eurekaserver:latest
-    container_name: eurekaserver 
+    container_name: eurekaserver
     pull_policy: always
     ports:
       - 8761:8761
@@ -88,7 +88,7 @@ services:
 
   accounts:
     image: ghergutmadalin/accounts:latest
-    container_name: accounts 
+    container_name: accounts
     pull_policy: always
     ports:
       - 8080:8080
@@ -105,7 +105,7 @@ services:
 
   loans:
     image: ghergutmadalin/loans:latest
-    container_name: loans 
+    container_name: loans
     pull_policy: always
     ports:
       - 8090:8090
@@ -122,7 +122,7 @@ services:
 
   cards:
     image: ghergutmadalin/cards:latest
-    container_name: cards 
+    container_name: cards
     pull_policy: always
     ports:
       - 9000:9000

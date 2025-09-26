@@ -1,14 +1,109 @@
+# Config Server accounts.yml - All configuration managed centrally
 build:
-  version: "1.0"
+  version: "3.0"
 
-app:
-  maintenance: false
-    
+server:
+  port: 8080
+
+# Database configuration
+spring:
+  datasource:
+    url: jdbc:mysql://accountsdb:3306/accountsdb
+    username: root
+    password: root
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: always
+  
+  # Jackson configuration
+  jackson:
+    default-property-inclusion: NON_NULL
+
+# Message queue configuration
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+
+# Service discovery configuration
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: accounts
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://eurekaserver:8761/eureka/
+    healthcheck:
+      enabled: true
+    registry-fetch-interval-seconds: 30
+
+# Management and monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /actuator
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+    shutdown:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+
+# Business configuration
 accounts:
-  message: "Hey, welcome to EazyBank accounts related production API"
+  message: "Welcome to EazyBank accounts related Docker prod APIs"
+  max-transaction-limit: 50000
+  allowed-currencies: "USD,EUR,GBP"
+  feature-flags:
+    mobile-payments-enabled: true
+    international-transfers: false
   contactDetails:
-    name: "Reine Aishwarya Big Boss - Product Owner"
-    email: "{cipher}f83ac5a34ba5f4657ae8e863c063c1b69efb4d23d0c431eb134f8d1b3ed0823dee0a4b627d091455b4c6600353a3682c"
+    name: "John Doe - Developer" 
+    email: "john@eazybank.com"
   onCallSupport:
-    - (453) 392-4829
-    - (236) 203-0384
+    - (555) 555-1234
+    - (555) 523-1345
+
+# Logging configuration
+logging:
+  level:
+    com.eazybank: INFO
+    com.netflix.eureka: WARN
+    org.springframework.web: WARN
+    root: INFO
+
+# External service URLs (container networking)
+external-apis:
+  fraud-detection:
+    url: http://fraud-service:8080
+    timeout: 5000
+  notification-service:
+    url: http://notification-service:8080
+    timeout: 3000
+
+# Static application metadata
+info:
+  app:
+    name: "accounts"
+    description: "EazyBank Accounts Application Production"
+    version: "@project.version@"

@@ -11,4 +11,4 @@ target/
 *.ipr
 .DS_Store
 
-/config-files-for-github
+!/config-files-for-github/

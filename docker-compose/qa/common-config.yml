@@ -1,3 +1,4 @@
+# Ultra-minimal common-config.yml
 services:
   network-deploy-service:
     networks:
@@ -6,9 +7,9 @@ services:
   microservice-db-config:
     extends:
       service: network-deploy-service
-    image: mysql
+    image: mysql:8.0
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 10s
       retries: 10
       interval: 10s
@@ -31,5 +32,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: qa
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+
+networks:
+  eazybank:
+    name: eazybank
+    driver: bridge

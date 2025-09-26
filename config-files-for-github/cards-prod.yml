@@ -1,14 +1,111 @@
+# Config Server accounts.yml - All configuration managed centrally
 build:
-  version: "1.0"
+  version: "3.0"
 
-app:
-  maintenance: false
+
+# Config Server accounts.yml - All configuration managed centrally
+server:
+  port: 9000
+
+# Database configuration
+spring:
+  datasource:
+    url: jdbc:mysql://cardsdb:3306/cardsdb
+    username: root
+    password: root
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: always
   
+  # Jackson configuration
+  jackson:
+    default-property-inclusion: NON_NULL
+
+# Message queue configuration
+rabbitmq:
+  host: rabbitmq
+  port: 5672
+  username: guest
+  password: guest
+
+# Service discovery configuration
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: cards
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://eurekaserver:8761/eureka/
+    healthcheck:
+      enabled: true
+    registry-fetch-interval-seconds: 30
+
+# Management and monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /actuator
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+    shutdown:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+
+# Business configuration
 cards:
-  message: "Hey, welcome to EazyBank cards related production APIs"
+  message: "Welcome to EazyBank cards related PROD APIs"
+  max-transaction-limit: 50000
+  allowed-currencies: "USD,EUR,GBP"
+  feature-flags:
+    mobile-payments-enabled: true
+    international-transfers: false
   contactDetails:
-    name: "Sandra Harald - Product Owner"
-    email: "sandra@eazybank.com"
+    name: "John Doe - Developer" 
+    email: "john@eazybank.com"
   onCallSupport:
-    - (617) 432-2356
-    - (936) 564-8721
+    - (555) 555-1234
+    - (555) 523-1345
+
+# Logging configuration
+logging:
+  level:
+    com.eazybank: INFO
+    com.netflix.eureka: WARN
+    org.springframework.web: WARN
+    root: INFO
+
+# External service URLs (container networking)
+external-apis:
+  fraud-detection:
+    url: http://fraud-service:8080
+    timeout: 5000
+  notification-service:
+    url: http://notification-service:8080
+    timeout: 3000
+
+# Static application metadata
+info:
+  app:
+    name: cards
+    description: EazyBank Cards Application PROD
+    version: "@project.version@"
