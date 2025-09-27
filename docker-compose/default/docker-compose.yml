@@ -90,6 +90,12 @@ services:
     image: ghergutmadalin/accounts:latest
     container_name: accounts
     pull_policy: always
+    healthcheck:
+      test: "apt-get update > /dev/null 2>&1 && apt-get install -y curl > /dev/null 2>&1 && curl --fail --silent http://localhost:8080/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
     ports:
       - 8080:8080
     depends_on:
@@ -107,6 +113,12 @@ services:
     image: ghergutmadalin/loans:latest
     container_name: loans
     pull_policy: always
+    healthcheck:
+      test: "apt-get update > /dev/null 2>&1 && apt-get install -y curl > /dev/null 2>&1 && curl --fail --silent http://localhost:8090/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
     ports:
       - 8090:8090
     depends_on:
@@ -124,6 +136,12 @@ services:
     image: ghergutmadalin/cards:latest
     container_name: cards
     pull_policy: always
+    healthcheck:
+      test: "apt-get update > /dev/null 2>&1 && apt-get install -y curl > /dev/null 2>&1 && curl --fail --silent http://localhost:9000/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
     ports:
       - 9000:9000
     depends_on:
