@@ -93,16 +93,6 @@ logging:
     org.springframework.web: WARN
     root: INFO
 
-# External service URLs (container networking)
-external-apis:
-  fraud-detection:
-    url: http://fraud-service:8080
-    timeout: 5000
-  notification-service:
-    url: http://notification-service:8080
-    timeout: 3000
-
-# Static application metadata
 info:
   app:
     name: "accounts"
