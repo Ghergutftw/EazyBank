@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: gatewayserver
+  config:
+    import: configserver:http://configserver:8071/
+

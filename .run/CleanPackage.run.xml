@@ -3,6 +3,7 @@
     <toRun name="accounts [clean,package]" type="MavenRunConfiguration" />
     <toRun name="cards [clean,package]" type="MavenRunConfiguration" />
     <toRun name="configserver [clean,package]" type="MavenRunConfiguration" />
+    <toRun name="gatewayserver [clean,package]" type="MavenRunConfiguration" />
     <toRun name="loans [clean,package]" type="MavenRunConfiguration" />
     <method v="2" />
   </configuration>
