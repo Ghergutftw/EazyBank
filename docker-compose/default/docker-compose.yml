@@ -47,8 +47,7 @@ services:
       service: network-deploy-service
 
   configserver:
-    image: ghergutmadalin/configserver:latest
-    pull_policy: always
+    image: ghergutmadalin/configserver:latest 
     container_name: configserver
     ports:
       - 8071:8071
@@ -67,8 +66,7 @@ services:
 
   eurekaserver:
     image: ghergutmadalin/eurekaserver:latest
-    container_name: eurekaserver
-    pull_policy: always
+    container_name: eurekaserver 
     ports:
       - 8761:8761
     depends_on:
@@ -91,6 +89,12 @@ services:
     container_name: gatewayserver
     ports:
       - 8072:8072
+    healthcheck:
+      test: "apt-get update > /dev/null 2>&1 && apt-get install -y curl > /dev/null 2>&1 && curl --fail --silent localhost:8072/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     depends_on:
       accounts:
         condition: service_healthy
@@ -98,8 +102,6 @@ services:
         condition: service_healthy
       cards:
         condition: service_healthy
-    environment:
-      SPRING_APPLICATION_NAME: gatewayserver
     extends:
       file: common-config.yml
       service: microservice-configserver-config

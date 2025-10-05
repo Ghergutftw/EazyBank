@@ -26,6 +26,7 @@ services:
           memory: 700m
 
   microservice-configserver-config:
+    pull_policy: always
     extends:
       service: microservice-base-config
     environment:

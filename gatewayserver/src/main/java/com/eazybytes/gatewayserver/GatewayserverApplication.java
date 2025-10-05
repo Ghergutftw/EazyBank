@@ -16,6 +16,8 @@ public class GatewayserverApplication {
         SpringApplication.run(GatewayserverApplication.class, args);
     }
 
+//    You can also create this in application.properties with in Java you can have more granual control
+//    and create more complex filters that with plain yml
     @Bean
     public RouteLocator eazyBankRouteConfig(RouteLocatorBuilder routeLocatorBuilder) {
         return routeLocatorBuilder.routes()
@@ -34,7 +36,7 @@ public class GatewayserverApplication {
                         .filters( f -> f.rewritePath("/eazybank/cards/(?<segment>.*)","/${segment}")
                                 .addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
                         .uri("lb://CARDS")).build();
-
+                        //This has to be with UPPERCASE because it reads the values from eureka where the default is with UPPERCASE
 
     }
 
