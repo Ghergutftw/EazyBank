@@ -12,12 +12,12 @@ spring:
         #         search-locations: "file:///Users//eazybytes//Documents//config"
         git:
           uri: "https://github.com/Ghergutftw/eazybytes-config.git"
-          default-label: main
+          default-label: local
           timeout: 5
           clone-on-start: true
           force-pull: true
   rabbitmq:
-    host: rabbitmq
+    host: localhost
     port: 5672
     #Default credentials for RabbitMQ
 

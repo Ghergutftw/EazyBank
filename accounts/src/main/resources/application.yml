@@ -2,5 +2,5 @@ spring:
   application:
     name: accounts
   config:
-    import: configserver:http://configserver:8071/
+    import: configserver:http://localhost:8071/
 
