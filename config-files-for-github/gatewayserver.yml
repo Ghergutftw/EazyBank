@@ -6,13 +6,10 @@ spring:
     name: gatewayserver
   cloud:
     gateway:
-      server:
-        webflux:
-          discovery:
-            locator:
-              enabled: true        # Enable automatic route creation from Eureka services
-                                   # May interfire with /actuator/gateway/routes endpoint
-              lower-case-service-id: true
+      discovery:
+        locator:
+          enabled: true       # Enable automatic route creation from Eureka services
+          lower-case-service-id: true
 
 eureka:
   client:
@@ -27,9 +24,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"          # Expose all actuator endpoints
+        include: "*"
+  endpoint:
     gateway:
-      access: unrestricted   # Allow unrestricted access to gateway actuator
+      enabled: true  # ADD THIS LINE - Critical for gateway actuator endpoints
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
   info:
     env:
       enabled: true
@@ -43,4 +48,18 @@ info:
 logging:
   level:
     com.eazybytes.gatewayserver: DEBUG
-    org.springframework.cloud.gateway: INFO   # Optional: see gateway logs
+    org.springframework.cloud.gateway: DEBUG
+    io.github.resilience4j: DEBUG
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        failureRateThreshold: 50
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+
+# CE CONFIGURARE DE KKT
