@@ -6,6 +6,10 @@ server:
   port: 8090
 # Database configuration
 spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
   datasource:
     url: jdbc:mysql://loansdb:3306/loansdb
     username: root
@@ -106,3 +110,13 @@ info:
     name: loans
     description: EazyBank Loans Application default
     version: "@project.version@"
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        failureRateThreshold: 50
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10

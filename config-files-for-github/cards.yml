@@ -7,6 +7,10 @@ build:
 
 # Database configuration
 spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
   datasource:
     url: jdbc:mysql://cardsdb:3306/cardsdb
     username: root
@@ -107,3 +111,14 @@ info:
     name: "cards"
     description: "EazyBank Cards Application Default"
     version: "@project.version@"
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        failureRateThreshold: 50
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10

@@ -6,11 +6,19 @@ spring:
     name: gatewayserver
   cloud:
     gateway:
+      httpclient:
+          connect-timeout: 1000
+          response-timeout: 2s
       discovery:
         locator:
           enabled: true       # Enable automatic route creation from Eureka services
           lower-case-service-id: true
-
+  data:
+    redis:
+      host: redis
+      port: 6379
+      connect-timeout: 1000ms
+      timeout: 2s
 eureka:
   client:
     register-with-eureka: true
@@ -61,5 +69,11 @@ resilience4j:
         failureRateThreshold: 50
         registerHealthIndicator: true
         eventConsumerBufferSize: 10
-
-# CE CONFIGURARE DE KKT
+    #If you don't define any instance, the will be created internally but not shown to the actuator(Lazy Loading)
+    instances:
+      accountsCircuitBreaker:
+        baseConfig: default
+      loansCircuitBreaker:
+        baseConfig: default
+      cardsCircuitBreaker:
+        baseConfig: default

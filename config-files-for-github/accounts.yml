@@ -8,6 +8,10 @@ server:
 
 # Database configuration
 spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
   datasource:
     url: jdbc:mysql://accountsdb:3306/accountsdb
     username: root
@@ -98,3 +102,24 @@ info:
     name: "accounts"
     description: "EazyBank Accounts Application Default"
     version: "@project.version@"
+
+resilience4j:
+  retry:
+   default:
+      max-attempts: 3
+      wait-duration: 2s
+      exponential-backoff-multiplier: 2
+      enableExponentialBackoff: true
+      retryExceptions:
+        - java.io.IOException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        failureRateThreshold: 50
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
