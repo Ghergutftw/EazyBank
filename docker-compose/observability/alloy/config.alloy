@@ -1,0 +1,96 @@
+discovery.docker "containers" {
+	host = "unix:///var/run/docker.sock"
+	refresh_interval = "5s"
+}
+
+discovery.relabel "containers" {
+	targets = discovery.docker.containers.targets
+
+	rule {
+		source_labels = ["__meta_docker_container_name"]
+		regex = "/(.*)"
+		target_label = "container"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+		target_label = "service"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+		target_label = "project"
+	}
+}
+
+loki.source.docker "containers" {
+	host = "unix:///var/run/docker.sock"
+	targets = discovery.docker.containers.targets
+	forward_to = [loki.write.default.receiver]
+	relabel_rules = discovery.relabel.containers.rules
+	refresh_interval = "5s"
+}
+
+loki.write "default" {
+	endpoint {
+		url = "http://gateway:3100/loki/api/v1/push"
+		tenant_id = "tenant1"
+	}
+	external_labels = {
+		cluster = "eazybank-microservices",
+	}
+}
+
+// Prometheus metrics scraping for microservices
+discovery.docker "prometheus_containers" {
+	host = "unix:///var/run/docker.sock"
+	refresh_interval = "5s"
+}
+
+discovery.relabel "prometheus_containers" {
+	targets = discovery.docker.prometheus_containers.targets
+
+	// Only scrape containers with actuator endpoints (Spring Boot microservices)
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+		regex = "(accounts|loans|cards|configserver|eurekaserver|gatewayserver)"
+		action = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_name"]
+		regex = "/(.*)"
+		target_label = "container"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+		target_label = "service"
+	}
+
+	rule {
+		source_labels = ["__address__"]
+		regex = "(.*):(.*)"
+		replacement = "${1}:8080"
+		target_label = "__address__"
+		action = "replace"
+	}
+
+	rule {
+		target_label = "__metrics_path__"
+		replacement = "/actuator/prometheus"
+	}
+}
+
+prometheus.scrape "microservices" {
+	targets = discovery.relabel.prometheus_containers.output
+	forward_to = [prometheus.remote_write.default.receiver]
+	scrape_interval = "15s"
+	metrics_path = "/actuator/prometheus"
+}
+
+prometheus.remote_write "default" {
+	endpoint {
+		url = "http://prometheus:9090/api/v1/write"
+	}
+}
