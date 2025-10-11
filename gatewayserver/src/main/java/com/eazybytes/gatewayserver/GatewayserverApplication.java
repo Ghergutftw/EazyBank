@@ -58,14 +58,42 @@ public class GatewayserverApplication {
                         .filters(f -> f.rewritePath("/eazybank/loans/(?<segment>.*)", "/${segment}")
                                 .addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
                                 .circuitBreaker(config -> config.setName("loansCircuitBreaker")
-                                        .setFallbackUri("forward:/contactSupport")))
+                                        .setFallbackUri("forward:/contactSupport"))
+                                .addResponseHeader("X-Connect-Timeout", "1000")
+                                .addResponseHeader("X-Response-Timeout", "2s")
+                                .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
+                                        .setKeyResolver(userKeyResolver()))
+                                .retry(
+                                        retryConfig -> {
+                                            retryConfig.setRetries(3)
+                                                    .setMethods(HttpMethod.GET)
+                                                    .setBackoff(
+                                                            Duration.ofMillis(100), Duration.ofMillis(1000), 2, true
+                                                    );
+                                        }
+                                )
+                        )
                         .uri("lb://LOANS"))
                 .route(p -> p
                         .path("/eazybank/cards/**")
                         .filters(f -> f.rewritePath("/eazybank/cards/(?<segment>.*)", "/${segment}")
                                 .addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
                                 .circuitBreaker(config -> config.setName("cardsCircuitBreaker")
-                                        .setFallbackUri("forward:/contactSupport")))
+                                        .setFallbackUri("forward:/contactSupport"))
+                                .addResponseHeader("X-Connect-Timeout", "1000")
+                                .addResponseHeader("X-Response-Timeout", "2s")
+                                .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter())
+                                        .setKeyResolver(userKeyResolver()))
+                                .retry(
+                                        retryConfig -> {
+                                            retryConfig.setRetries(3)
+                                                    .setMethods(HttpMethod.GET)
+                                                    .setBackoff(
+                                                            Duration.ofMillis(100), Duration.ofMillis(1000), 2, true
+                                                    );
+                                        }
+                                )
+                        )
                         .uri("lb://CARDS")).build();
         //This has to be with UPPERCASE because it reads the values from eureka where the default is with UPPERCASE
 
