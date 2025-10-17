@@ -78,10 +78,11 @@ services:
         condition: service_healthy
     healthcheck:
       test: "apt-get update > /dev/null 2>&1 && apt-get install -y curl > /dev/null 2>&1 && curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 1"
-      interval: 3s
-      timeout: 2s
+#      Nu le schimba =)
+      interval: 10s
+      timeout: 5s
       retries: 10
-      start_period: 5s
+      start_period: 10s
     extends:
       file: common-config.yml
       service: microservice-configserver-config
@@ -367,6 +368,7 @@ services:
       - --web.console.libraries=/etc/prometheus/console_libraries
       - --web.console.templates=/etc/prometheus/consoles
       - --web.enable-lifecycle
+      - --web.enable-remote-write-receiver  # Add this line
     volumes:
       - ../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
