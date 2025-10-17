@@ -63,6 +63,8 @@ services:
     extends:
       file: common-config.yml
       service: microservice-base-config
+    environment:
+      OTEL_SERVICE_NAME: "configserver"
 
   eurekaserver:
     image: ghergutmadalin/eurekaserver:latest
@@ -76,13 +78,15 @@ services:
         condition: service_healthy
     healthcheck:
       test: "apt-get update > /dev/null 2>&1 && apt-get install -y curl > /dev/null 2>&1 && curl --fail --silent localhost:8761/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
+      interval: 3s
+      timeout: 2s
       retries: 10
-      start_period: 10s
+      start_period: 5s
     extends:
       file: common-config.yml
       service: microservice-configserver-config
+    environment:
+      OTEL_SERVICE_NAME: "eurekaserver"
 
   gatewayserver:
     image: ghergutmadalin/gatewayserver:latest
@@ -105,6 +109,8 @@ services:
     extends:
       file: common-config.yml
       service: microservice-configserver-config
+    environment:
+      OTEL_SERVICE_NAME: "gatewayserver"
 
   accounts:
     image: ghergutmadalin/accounts:latest
@@ -128,6 +134,8 @@ services:
     extends:
       file: common-config.yml
       service: microservice-configserver-config
+    environment:
+      OTEL_SERVICE_NAME: "accounts"
 
   loans:
     image: ghergutmadalin/loans:latest
@@ -151,6 +159,8 @@ services:
     extends:
       file: common-config.yml
       service: microservice-configserver-config
+    environment:
+      OTEL_SERVICE_NAME: "loans"
 
   cards:
     image: ghergutmadalin/cards:latest
@@ -174,6 +184,8 @@ services:
     extends:
       file: common-config.yml
       service: microservice-configserver-config
+    environment:
+      OTEL_SERVICE_NAME: "cards"
 
   # MinIO for S3-compatible object storage (used by Loki)
   minio:
@@ -195,7 +207,7 @@ services:
     volumes:
       - minio-data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 30s
       timeout: 20s
       retries: 3
@@ -297,7 +309,7 @@ services:
     depends_on:
       - minio
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -317,7 +329,7 @@ services:
     volumes:
       - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
