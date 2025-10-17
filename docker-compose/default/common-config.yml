@@ -1,12 +1,11 @@
-# Ultra-minimal common-config.yml
 services:
-  network-deploy-service:
+  network-service:
     networks:
       - eazybank
 
-  microservice-db-config:
+  db-service:
     extends:
-      service: network-deploy-service
+      service: network-service
     image: mysql:8.0
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -17,9 +16,9 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
 
-  microservice-base-config:
+  base-service:
     extends:
-      service: network-deploy-service
+      service: network-service
     deploy:
       resources:
         limits:
@@ -30,15 +29,14 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
 
-  microservice-configserver-config:
+  app-service:
     pull_policy: always
     extends:
-      service: microservice-base-config
+      service: base-service
     environment:
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
 
 networks:
   eazybank:
-    name: eazybank
     driver: bridge
