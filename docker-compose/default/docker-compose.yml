@@ -393,11 +393,27 @@ services:
       file: common-config.yml
       service: network-service
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.0
+    container_name: keycloak
+    ports:
+      - "7080:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "admin"
+    command: "start-dev"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+    extends:
+      file: common-config.yml
+      service: network-service
+
 volumes:
   minio-data:
   prometheus-data:
   grafana-data:
   tempo-data:
+  keycloak-data:
 
 networks:
   eazybank:
