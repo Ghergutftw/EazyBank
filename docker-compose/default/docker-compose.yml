@@ -408,6 +408,37 @@ services:
       file: common-config.yml
       service: network-service
 
+  rabbit:
+    image: rabbitmq:4.0-management
+    container_name: rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    extends:
+      file: common-config.yml
+      service: network-service
+
+  message:
+    image: "ghergutmadalin/message:latest"
+    container_name: message-ms
+    pull_policy: always
+    ports:
+      - "9010:9010"
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    environment:
+      SPRING_RABBITMQ_HOST: rabbit
+    extends:
+      file: common-config.yml
+      service: network-service
+
 volumes:
   minio-data:
   prometheus-data:
