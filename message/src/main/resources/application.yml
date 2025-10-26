@@ -6,7 +6,9 @@ spring:
     name: "message"
   cloud:
     function:
+#      Available function definitions, they are combined into a single pipeline using '|'
       definition: email|sms
+      # Spring Cloud Stream
     stream:
       bindings:
         emailsms-in-0:
