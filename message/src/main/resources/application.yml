@@ -6,9 +6,7 @@ spring:
     name: "message"
   cloud:
     function:
-#      Available function definitions, they are combined into a single pipeline using '|'
       definition: email|sms
-      # Spring Cloud Stream
     stream:
       bindings:
         emailsms-in-0:
@@ -16,9 +14,7 @@ spring:
           group: ${spring.application.name}
         emailsms-out-0:
           destination: communication-sent
-  rabbitmq:
-    host: rabbit
-    port: 5672
-    username: guest
-    password: guest
-    connection-timeout: 10s
+      kafka:
+        binder:
+          brokers:
+            - kafka:9092
