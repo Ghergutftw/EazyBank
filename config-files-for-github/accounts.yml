@@ -1,14 +1,24 @@
-# Config Server accounts.yml - All configuration managed centrally
 build:
   version: "3.0"
 
 server:
   port: 8080
 
-
-# Database configuration
 spring:
   cloud:
+    functions:
+      definition: updateCommunication
+    stream:
+      bindings:
+        updateCommunication-in-0:
+          destination: communication-sent
+          group: ${spring.application.name}
+        sendCommunication-out-0:
+          destination: send-communication
+      kafka:
+        binder:
+          brokers:
+            - kafka:9092
     openfeign:
       circuitbreaker:
         enabled: true
@@ -23,19 +33,9 @@ spring:
   sql:
     init:
       mode: always
-  
-  # Jackson configuration
   jackson:
     default-property-inclusion: NON_NULL
 
-# Message queue configuration
-  rabbitmq:
-    host: rabbitmq
-    port: 5672
-    username: guest
-    password: guest
-
-# Service discovery configuration
 eureka:
   instance:
     prefer-ip-address: true
@@ -51,7 +51,6 @@ eureka:
       enabled: true
     registry-fetch-interval-seconds: 30
 
-# Management and monitoring
 management:
   endpoints:
     web:
@@ -73,8 +72,10 @@ management:
   info:
     env:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
-# Business configuration
 accounts:
   message: "Welcome to EazyBank accounts related default Docker APIs"
   max-transaction-limit: 50000
@@ -83,19 +84,20 @@ accounts:
     mobile-payments-enabled: true
     international-transfers: false
   contactDetails:
-    name: "John Doe - Developer" 
+    name: "John Doe - Developer"
     email: "john@eazybank.com"
-  onCallSupport:
-    - (555) 555-1234
-    - (555) 523-1345
+    onCallSupport:
+      - "(555) 555-1234"
+      - "(555) 523-1345"
 
-# Logging configuration
 logging:
   level:
     com.eazybank: INFO
     com.netflix.eureka: WARN
     org.springframework.web: WARN
     root: INFO
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
 info:
   app:
@@ -104,16 +106,23 @@ info:
     version: "@project.version@"
 
 resilience4j:
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 10
+        limit-refresh-period: 5000ms
+        timeout-duration: 1000ms
   retry:
-   default:
-      max-attempts: 3
-      wait-duration: 2s
-      exponential-backoff-multiplier: 2
-      enableExponentialBackoff: true
-      retryExceptions:
-        - java.io.IOException
-      ignoreExceptions:
-        - java.lang.NullPointerException
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 2s
+        exponential-backoff-multiplier: 2
+        enableExponentialBackoff: true
+        retryExceptions:
+          - java.io.IOException
+        ignoreExceptions:
+          - java.lang.NullPointerException
   circuitbreaker:
     configs:
       default:

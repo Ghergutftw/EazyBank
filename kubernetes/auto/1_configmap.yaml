@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eazybank-configmap
+data:
+  # Application profiles
+  SPRING_PROFILES_ACTIVE: "default"
+
+  # Config server
+  SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
+
+  # Eureka server
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eurekaserver:8761/eureka/"
+
+  # RabbitMQ
+  SPRING_RABBITMQ_HOST: "rabbitmq"
+
+  # Spring Cloud Stream - Set RabbitMQ as default binder
+  SPRING_CLOUD_STREAM_DEFAULT-BINDER: "rabbit"
+
+  # OpenTelemetry (disabled by default - enable when observability stack is deployed)
+  # JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+  # OTEL_EXPORTER_OTLP_ENDPOINT: "http://tempo:4318"
+  # OTEL_METRICS_EXPORTER: "none"
+  # OTEL_LOGS_EXPORTER: "none"
+
+  # Keycloak
+  KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+  KC_BOOTSTRAP_ADMIN_PASSWORD: "admin"
+
+  # Grafana
+  GF_SECURITY_ADMIN_USER: "admin"
+  GF_SECURITY_ADMIN_PASSWORD: "admin"
+  GF_USERS_ALLOW_SIGN_UP: "false"
+
+  # MinIO
+  MINIO_ROOT_USER: "loki"
+  MINIO_ROOT_PASSWORD: "supersecret"
+  MINIO_PROMETHEUS_AUTH_TYPE: "public"
+  MINIO_UPDATE: "off"
+
+  # Kafka
+  KAFKA_BROKER_ID: "1"
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT"
+  KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092"
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+  KAFKA_PROCESS_ROLES: "broker,controller"
+  KAFKA_NODE_ID: "1"
+  KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
+  KAFKA_LISTENERS: "PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://kafka:9092"
+  KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+  KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+  KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+  CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+
+  # MySQL databases
+  MYSQL_ROOT_PASSWORD: "root"
+

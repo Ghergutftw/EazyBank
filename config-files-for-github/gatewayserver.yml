@@ -7,18 +7,26 @@ spring:
   cloud:
     gateway:
       httpclient:
-          connect-timeout: 1000
-          response-timeout: 2s
+        connect-timeout: 1000
+        response-timeout: 10s
       discovery:
         locator:
           enabled: true       # Enable automatic route creation from Eureka services
           lower-case-service-id: true
-  data:
-    redis:
-      host: redis
-      port: 6379
-      connect-timeout: 1000ms
-      timeout: 2s
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+        # Download a public key from the authorization server to validate JWT tokens
+          jwk-set-uri: http://keycloak:8080/realms/master/protocol/openid-connect/certs
+  # Uncomment when Redis is available
+  # data:
+  #   redis:
+  #     host: redis
+  #     port: 6379
+  #     connect-timeout: 1000ms
+  #     timeout: 10s
+
 eureka:
   client:
     register-with-eureka: true
@@ -33,24 +41,35 @@ management:
     web:
       exposure:
         include: "*"
+      base-path: /actuator
   endpoint:
     gateway:
-      enabled: true  # ADD THIS LINE - Critical for gateway actuator endpoints
+      access: unrestricted  # CHANGED: Replacement for 'enabled: true'
     health:
       show-details: always
       probes:
         enabled: true
   health:
+    health:
+      readiness-state:
+        enabled: true
+      liveness-state:
+        enabled: true
     circuitbreakers:
       enabled: true
   info:
     env:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+
 
 info:
   app:
     name: "gatewayserver"
-    description: "Eazy Bank Gateway Server Application"
+    description: "EazyBank Gateway Server Application"
     version: "1.0.0"
 
 logging:
@@ -58,6 +77,8 @@ logging:
     com.eazybytes.gatewayserver: DEBUG
     org.springframework.cloud.gateway: DEBUG
     io.github.resilience4j: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
 resilience4j:
   circuitbreaker:

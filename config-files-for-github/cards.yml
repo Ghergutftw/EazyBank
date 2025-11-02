@@ -1,11 +1,9 @@
-# Config Server accounts.yml - All configuration managed centrally
-server:
-  port: 9000
-
 build:
   version: "3.0"
 
-# Database configuration
+server:
+  port: 9000
+
 spring:
   cloud:
     openfeign:
@@ -22,19 +20,14 @@ spring:
   sql:
     init:
       mode: always
-  
-  # Jackson configuration
   jackson:
     default-property-inclusion: NON_NULL
-
-# Message queue configuration
   rabbitmq:
     host: rabbitmq
     port: 5672
     username: guest
     password: guest
 
-# Service discovery configuration
 eureka:
   instance:
     prefer-ip-address: true
@@ -50,7 +43,6 @@ eureka:
       enabled: true
     registry-fetch-interval-seconds: 30
 
-# Management and monitoring
 management:
   endpoints:
     web:
@@ -72,8 +64,10 @@ management:
   info:
     env:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
-# Business configuration
 cards:
   message: "Welcome to EazyBank cards related Default Docker APIs"
   max-transaction-limit: 50000
@@ -82,21 +76,21 @@ cards:
     mobile-payments-enabled: true
     international-transfers: false
   contactDetails:
-    name: "John Doe - Developer" 
+    name: "John Doe - Developer"
     email: "john@eazybank.com"
-  onCallSupport:
-    - (555) 555-1234
-    - (555) 523-1345
+    onCallSupport:
+      - "(555) 555-1234"
+      - "(555) 523-1345"
 
-# Logging configuration
 logging:
   level:
     com.eazybank: INFO
     com.netflix.eureka: WARN
     org.springframework.web: WARN
     root: INFO
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
-# External service URLs (container networking)
 external-apis:
   fraud-detection:
     url: http://fraud-service:8080
@@ -105,7 +99,6 @@ external-apis:
     url: http://notification-service:8080
     timeout: 3000
 
-# Static application metadata
 info:
   app:
     name: "cards"
