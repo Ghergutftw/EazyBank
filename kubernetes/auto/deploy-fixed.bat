@@ -11,7 +11,7 @@ echo.
 echo [2/8] Deploying MySQL Databases...
 kubectl apply -f 2_mysql-databases.yaml
 echo Waiting 30 seconds for databases to initialize...
-ping 127.0.0.1 -n 31 > nul
+ping 127.0.0.1 -n 10 > nul
 echo.
 
 echo [3/8] Deploying RabbitMQ...
@@ -23,13 +23,13 @@ echo.
 echo [4/8] Deploying Config Server...
 kubectl apply -f 4_configserver.yaml
 echo Waiting 30 seconds for Config Server...
-ping 127.0.0.1 -n 31 > nul
+ping 127.0.0.1 -n 10 > nul
 echo.
 
 echo [5/8] Deploying Eureka Server...
 kubectl apply -f 5_eurekaserver.yaml
 echo Waiting 30 seconds for Eureka Server...
-ping 127.0.0.1 -n 31 > nul
+ping 127.0.0.1 -n 10 > nul
 echo.
 
 echo [6/8] Deploying Microservices (Accounts, Loans, Cards, Message)...
@@ -55,21 +55,16 @@ echo [9/11] Deploying Kafka...
 kubectl apply -f 18_kafka.yaml
 echo.
 
-set /p deploy_obs="Do you want to deploy Observability Stack (Grafana, Prometheus, Tempo, Loki)? (y/n): "
-if /i "%deploy_obs%"=="y" (
-    echo [10/11] Deploying Observability Stack...
-    kubectl apply -f 11_minio.yaml
-    kubectl apply -f 12_loki.yaml
-    kubectl apply -f 13_prometheus.yaml
-    kubectl apply -f 14_tempo.yaml
-    kubectl apply -f 15_alloy.yaml
-    kubectl apply -f 16_grafana.yaml
-    echo Observability stack deployed.
-    echo.
-) else (
-    echo [10/11] Skipping Observability Stack deployment.
-    echo.
-)
+
+echo [10/11] Deploying Observability Stack...
+kubectl apply -f 11_minio.yaml
+kubectl apply -f 12_loki.yaml
+kubectl apply -f 13_prometheus.yaml
+kubectl apply -f 14_tempo.yaml
+kubectl apply -f 15_alloy.yaml
+kubectl apply -f 16_grafana.yaml
+echo Observability stack deployed.
+echo.
 
 echo [11/11] Checking deployment status...
 echo.

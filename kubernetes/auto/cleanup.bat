@@ -8,12 +8,6 @@ echo ==================================================
 echo.
 echo WARNING: This will delete all EazyBank resources from Kubernetes!
 echo.
-set /p confirm="Are you sure you want to continue? (yes/no): "
-
-if /i not "%confirm%"=="yes" (
-    echo Cleanup cancelled.
-    exit /b 0
-)
 
 echo.
 echo Deleting all resources...
