@@ -125,7 +125,7 @@
                 <version>3.4.0</version>
                 <configuration>
                     <from>
-                        <image>openjdk:21-jdk-slim</image>
+                        <image>eclipse-temurin:21-jre</image>
                     </from>
                     <to>
                         <image>ghergutmadalin/${project.artifactId}:latest</image>

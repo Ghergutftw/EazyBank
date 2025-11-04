@@ -44,17 +44,16 @@ management:
       base-path: /actuator
   endpoint:
     gateway:
-      access: unrestricted  # CHANGED: Replacement for 'enabled: true'
+      access: unrestricted
     health:
       show-details: always
       probes:
         enabled: true
   health:
-    health:
-      readiness-state:
-        enabled: true
-      liveness-state:
-        enabled: true
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
     circuitbreakers:
       enabled: true
   info:

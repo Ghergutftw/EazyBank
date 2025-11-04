@@ -20,6 +20,7 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity serverHttpSecurity) {
         serverHttpSecurity.authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers(HttpMethod.GET).permitAll()
                         .pathMatchers("/eazybank/accounts/**").hasRole("ACCOUNTS")
                         .pathMatchers("/eazybank/cards/**").hasRole("CARDS")
@@ -37,5 +38,4 @@ public class SecurityConfig {
                 (new KeycloakRoleConverter());
         return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
     }
-
 }

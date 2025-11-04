@@ -421,20 +421,20 @@ services:
 #      file: common-config.yml
 #      service: network-service
 
-  message:
-    image: "ghergutmadalin/message:latest"
-    container_name: message-ms
-    pull_policy: always
-    ports:
-      - "9010:9010"
-    depends_on:
-      rabbit:
-        condition: service_healthy
-    environment:
-      SPRING_RABBITMQ_HOST: rabbit
-    extends:
-      file: common-config.yml
-      service: network-service
+#  message:
+#    image: "ghergutmadalin/message:latest"
+#    container_name: message-ms
+#    pull_policy: always
+#    ports:
+#      - "9010:9010"
+#    depends_on:
+#      rabbit:
+#        condition: service_healthy
+#    environment:
+#      SPRING_RABBITMQ_HOST: rabbit
+#    extends:
+#      file: common-config.yml
+#      service: network-service
 
   kafka:
     image: apache/kafka:4.1.0
