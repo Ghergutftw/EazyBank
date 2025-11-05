@@ -43,7 +43,7 @@ config:
   # OpenTelemetry configuration (disabled by default)
   # Enable this section when deploying observability stack
   observability:
-    enabled: false
+    enabled: true
     javaToolOptions: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
     otelExporterEndpoint: "http://tempo:4318"
     otelMetricsExporter: "none"
@@ -369,7 +369,7 @@ message:
 
 # MinIO - Object storage for Loki
 minio:
-  enabled: false
+  enabled: true
   image:
     repository: minio/minio
     tag: "RELEASE.2024-12-18T13-15-44Z"
@@ -379,7 +379,7 @@ minio:
 
 # Loki - Log aggregation
 loki:
-  enabled: false
+  enabled: true
   image:
     repository: grafana/loki
     tag: "3.2.0"
@@ -399,7 +399,7 @@ prometheus:
 
 # Tempo - Distributed tracing
 tempo:
-  enabled: false
+  enabled: true
   image:
     repository: grafana/tempo
     tag: "2.6.0"
@@ -409,7 +409,7 @@ tempo:
 
 # Grafana Alloy - Telemetry pipeline
 alloy:
-  enabled: false
+  enabled: true
   image:
     repository: grafana/alloy
     tag: "v1.4.0"
@@ -426,7 +426,7 @@ grafana:
 
 # Keycloak - Identity and access management
 keycloak:
-  enabled: false
+  enabled: true
   image:
     repository: quay.io/keycloak/keycloak
     tag: "26.4.0"
@@ -436,7 +436,7 @@ keycloak:
 
 # Kafka - Event streaming platform
 kafka:
-  enabled: false
+  enabled: true
   image:
     repository: apache/kafka
     tag: "4.1.0"
