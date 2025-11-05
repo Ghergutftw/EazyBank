@@ -1,0 +1,51 @@
+{{- if .Values.loans.enabled }}
+{{/*
+Loans Microservice
+Manages customer loan operations
+*/}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loans
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "loans" "context" .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.loans.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "eazybank.microservice.selectorLabels" (dict "name" "loans" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eazybank.microservice.selectorLabels" (dict "name" "loans" "context" .) | nindent 8 }}
+    spec:
+      containers:
+      - name: loans
+        image: {{ include "eazybank.image" (dict "repository" .Values.loans.image.repository "tag" .Values.loans.image.tag "context" .) }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        ports:
+        - containerPort: {{ .Values.loans.containerPort }}
+        env:
+        {{- include "eazybank.springboot.env" . | nindent 8 }}
+        {{- include "eazybank.resources" .Values.loans.resources | nindent 8 }}
+        {{- include "eazybank.springboot.livenessProbe" (dict "path" .Values.loans.probes.liveness.path "port" .Values.loans.containerPort "initialDelay" .Values.loans.probes.liveness.initialDelaySeconds "period" .Values.loans.probes.liveness.periodSeconds "timeout" .Values.loans.probes.liveness.timeoutSeconds "failureThreshold" .Values.loans.probes.liveness.failureThreshold) | nindent 8 }}
+        {{- include "eazybank.springboot.readinessProbe" (dict "path" .Values.loans.probes.readiness.path "port" .Values.loans.containerPort "initialDelay" .Values.loans.probes.readiness.initialDelaySeconds "period" .Values.loans.probes.readiness.periodSeconds "timeout" .Values.loans.probes.readiness.timeoutSeconds "failureThreshold" .Values.loans.probes.readiness.failureThreshold) | nindent 8 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loans
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "loans" "context" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "eazybank.microservice.selectorLabels" (dict "name" "loans" "context" .) | nindent 4 }}
+  type: {{ .Values.loans.service.type }}
+  ports:
+    - protocol: TCP
+      name: http
+      port: {{ .Values.loans.service.port }}
+      targetPort: {{ .Values.loans.containerPort }}
+{{- end }}
+

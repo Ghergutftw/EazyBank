@@ -1,0 +1,60 @@
+{{- if .Values.eurekaserver.enabled }}
+{{/*
+Spring Cloud Netflix Eureka Server
+Service registry for dynamic service discovery
+Enables client-side load balancing and resilience patterns
+*/}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eurekaserver
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "eurekaserver" "context" .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.eurekaserver.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "eazybank.microservice.selectorLabels" (dict "name" "eurekaserver" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eazybank.microservice.selectorLabels" (dict "name" "eurekaserver" "context" .) | nindent 8 }}
+    spec:
+      containers:
+      - name: eurekaserver
+        image: {{ include "eazybank.image" (dict "repository" .Values.eurekaserver.image.repository "tag" .Values.eurekaserver.image.tag "context" .) }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        ports:
+        - containerPort: {{ .Values.eurekaserver.containerPort }}
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "eazybank.fullname" . }}-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: SPRING_CONFIG_IMPORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "eazybank.fullname" . }}-config
+              key: SPRING_CONFIG_IMPORT
+        {{- include "eazybank.resources" .Values.eurekaserver.resources | nindent 8 }}
+        {{- include "eazybank.springboot.livenessProbe" (dict "path" .Values.eurekaserver.probes.liveness.path "port" .Values.eurekaserver.containerPort "initialDelay" .Values.eurekaserver.probes.liveness.initialDelaySeconds "period" .Values.eurekaserver.probes.liveness.periodSeconds "timeout" .Values.eurekaserver.probes.liveness.timeoutSeconds "failureThreshold" 3) | nindent 8 }}
+        {{- include "eazybank.springboot.readinessProbe" (dict "path" .Values.eurekaserver.probes.readiness.path "port" .Values.eurekaserver.containerPort "initialDelay" .Values.eurekaserver.probes.readiness.initialDelaySeconds "period" .Values.eurekaserver.probes.readiness.periodSeconds "timeout" .Values.eurekaserver.probes.readiness.timeoutSeconds "failureThreshold" 3) | nindent 8 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eurekaserver
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "eurekaserver" "context" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "eazybank.microservice.selectorLabels" (dict "name" "eurekaserver" "context" .) | nindent 4 }}
+  type: {{ .Values.eurekaserver.service.type }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.eurekaserver.service.port }}
+      targetPort: {{ .Values.eurekaserver.containerPort }}
+{{- end }}
+

@@ -1,0 +1,454 @@
+# ============================================================================
+# Global Configuration
+# These values are inherited by all sub-charts and can be overridden
+# ============================================================================
+global:
+  # Default image pull policy for all containers
+  imagePullPolicy: Always
+
+  # Image registry prefix - useful for private registries
+  imageRegistry: ""
+
+  # Default resource limits and requests for microservices
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+
+# ============================================================================
+# Common ConfigMap Values
+# Centralized configuration for all microservices
+# ============================================================================
+config:
+  # Spring profile to activate (default, qa, prod)
+  springProfilesActive: "default"
+
+  # Config Server URL
+  springConfigImport: "configserver:http://configserver:8071/"
+
+  # Eureka Server URL for service discovery
+  eurekaClientServiceUrl: "http://eurekaserver:8761/eureka/"
+
+  # RabbitMQ configuration
+  rabbitmq:
+    host: "rabbitmq"
+    defaultBinder: "rabbit"
+
+  # MySQL root password (consider using Kubernetes secrets in production)
+  mysql:
+    rootPassword: "root"
+
+  # OpenTelemetry configuration (disabled by default)
+  # Enable this section when deploying observability stack
+  observability:
+    enabled: false
+    javaToolOptions: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+    otelExporterEndpoint: "http://tempo:4318"
+    otelMetricsExporter: "none"
+    otelLogsExporter: "none"
+
+  # Keycloak admin credentials
+  keycloak:
+    adminUsername: "admin"
+    adminPassword: "admin"
+
+  # Grafana admin credentials
+  grafana:
+    adminUser: "admin"
+    adminPassword: "admin"
+    allowSignUp: "false"
+
+  # MinIO configuration for Loki storage
+  minio:
+    rootUser: "loki"
+    rootPassword: "supersecret"
+    prometheusAuthType: "public"
+    update: "off"
+
+  # Kafka broker configuration
+  kafka:
+    brokerId: "1"
+    listenerSecurityProtocolMap: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT"
+    advertisedListeners: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092"
+    offsetsTopicReplicationFactor: "1"
+    groupInitialRebalanceDelayMs: "0"
+    transactionStateLogMinIsr: "1"
+    transactionStateLogReplicationFactor: "1"
+    processRoles: "broker,controller"
+    nodeId: "1"
+
+# ============================================================================
+# Infrastructure Components
+# ============================================================================
+
+# RabbitMQ message broker configuration
+rabbitmq:
+  enabled: true
+  image:
+    repository: rabbitmq
+    tag: "3.13-management"
+  service:
+    type: ClusterIP
+    amqpPort: 5672
+    managementPort: 15672
+  probes:
+    liveness:
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+    readiness:
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+
+# MySQL database instances
+mysql:
+  # Accounts database
+  accountsdb:
+    enabled: true
+    image:
+      repository: mysql
+      tag: "8.0"
+    database: "accountsdb"
+    service:
+      type: ClusterIP
+      port: 3306
+    probes:
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 10
+
+  # Loans database
+  loansdb:
+    enabled: true
+    image:
+      repository: mysql
+      tag: "8.0"
+    database: "loansdb"
+    service:
+      type: ClusterIP
+      port: 3306
+    probes:
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 10
+
+  # Cards database
+  cardsdb:
+    enabled: true
+    image:
+      repository: mysql
+      tag: "8.0"
+    database: "cardsdb"
+    service:
+      type: ClusterIP
+      port: 3306
+    probes:
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 10
+
+# ============================================================================
+# Spring Cloud Infrastructure Services
+# ============================================================================
+
+# Config Server - centralized configuration management
+configserver:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghergutmadalin/configserver
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8071
+  containerPort: 8071
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+  probes:
+    liveness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+    readiness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+
+# Eureka Server - service discovery
+eurekaserver:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghergutmadalin/eurekaserver
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8761
+  containerPort: 8761
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+  probes:
+    liveness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+    readiness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+
+# Gateway Server - API Gateway with routing and filtering
+gatewayserver:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghergutmadalin/gatewayserver
+    tag: latest
+  service:
+    # LoadBalancer for external access, change to ClusterIP + Ingress in production
+    type: LoadBalancer
+    port: 8072
+  containerPort: 8072
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+  # Optional: Ingress configuration for production
+  ingress:
+    enabled: false
+    className: "nginx"
+    annotations: {}
+      # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - host: gateway.eazybank.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+      # - secretName: gateway-tls
+      #   hosts:
+      #     - gateway.eazybank.local
+
+# ============================================================================
+# Business Microservices
+# ============================================================================
+
+# Accounts microservice
+accounts:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghergutmadalin/accounts
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8080
+  containerPort: 8080
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+  # Health check probes using Spring Boot Actuator
+  probes:
+    liveness:
+      path: /actuator/health/liveness
+      initialDelaySeconds: 90
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 5
+    readiness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 5
+
+# Loans microservice
+loans:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghergutmadalin/loans
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8090
+  containerPort: 8090
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+  probes:
+    liveness:
+      path: /actuator/health/liveness
+      initialDelaySeconds: 90
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 5
+    readiness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 5
+
+# Cards microservice
+cards:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghergutmadalin/cards
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 9000
+  containerPort: 9000
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+  probes:
+    liveness:
+      path: /actuator/health/liveness
+      initialDelaySeconds: 90
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 5
+    readiness:
+      path: /actuator/health/readiness
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 5
+
+# Message microservice for async communication
+message:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghergutmadalin/message
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 9010
+  containerPort: 9010
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+
+# ============================================================================
+# Observability Stack (Optional)
+# Enable these when you need monitoring and tracing
+# ============================================================================
+
+# MinIO - Object storage for Loki
+minio:
+  enabled: false
+  image:
+    repository: minio/minio
+    tag: "RELEASE.2024-12-18T13-15-44Z"
+  service:
+    type: ClusterIP
+    port: 9000
+
+# Loki - Log aggregation
+loki:
+  enabled: false
+  image:
+    repository: grafana/loki
+    tag: "3.2.0"
+  service:
+    type: ClusterIP
+    port: 3100
+
+# Prometheus - Metrics collection (enabled by default for monitoring)
+prometheus:
+  enabled: true
+  image:
+    repository: prom/prometheus
+    tag: "v2.54.1"
+  service:
+    type: ClusterIP
+    port: 9090
+
+# Tempo - Distributed tracing
+tempo:
+  enabled: false
+  image:
+    repository: grafana/tempo
+    tag: "2.6.0"
+  service:
+    type: ClusterIP
+    port: 4318
+
+# Grafana Alloy - Telemetry pipeline
+alloy:
+  enabled: false
+  image:
+    repository: grafana/alloy
+    tag: "v1.4.0"
+
+# Grafana - Observability dashboards (enabled by default for monitoring)
+grafana:
+  enabled: true
+  image:
+    repository: grafana/grafana
+    tag: "11.2.2"
+  service:
+    type: LoadBalancer
+    port: 3000
+
+# Keycloak - Identity and access management
+keycloak:
+  enabled: false
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: "26.4.0"
+  service:
+    type: LoadBalancer
+    port: 7080
+
+# Kafka - Event streaming platform
+kafka:
+  enabled: false
+  image:
+    repository: apache/kafka
+    tag: "4.1.0"
+  service:
+    type: ClusterIP
+    port: 9092
+  # Additional environment variables for Kafka
+  extraEnv: {}
+    # KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
+    # KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093"
+    # KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+    # KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+    # KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+    # CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+

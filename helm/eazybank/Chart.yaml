@@ -1,0 +1,31 @@
+# Helm Chart metadata for EazyBank microservices application
+# Following Helm 3 chart specification
+apiVersion: v2
+name: eazybank
+description: A Helm chart for EazyBank microservices platform with Spring Boot, Eureka, and observability stack
+type: application
+
+# Chart version - increment this on chart changes
+version: 1.0.0
+
+# Application version - version of the containerized applications
+appVersion: "1.0.0"
+
+# Keywords for chart discovery
+keywords:
+  - microservices
+  - spring-boot
+  - banking
+  - eureka
+  - spring-cloud
+
+# Maintainers information
+maintainers:
+  - name: EazyBank Team
+    email: team@eazybank.com
+
+# Additional metadata
+home: https://github.com/yourusername/eazybank
+sources:
+  - https://github.com/yourusername/eazybank
+

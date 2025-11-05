@@ -1,0 +1,69 @@
+# QA Environment Configuration
+# Use this file with: helm install eazybank . -f values-qa.yaml
+
+# QA profile configuration
+config:
+  springProfilesActive: "qa"
+
+# Gateway with ClusterIP + Ingress for QA
+gatewayserver:
+  replicaCount: 2
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: true
+    className: "nginx"
+    hosts:
+      - host: qa-api.eazybank.com
+        paths:
+          - path: /
+            pathType: Prefix
+
+# Scale microservices for QA testing
+accounts:
+  replicaCount: 2
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+
+loans:
+  replicaCount: 2
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+
+cards:
+  replicaCount: 2
+  resources:
+    limits:
+      memory: "700Mi"
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+
+# Enable monitoring for QA testing
+prometheus:
+  enabled: true
+
+grafana:
+  enabled: true
+  service:
+    type: ClusterIP  # Use with Ingress in QA
+
+# Optional: Enable tracing for QA testing
+tempo:
+  enabled: false
+
+# Disable resource-intensive components
+loki:
+  enabled: false
+
+minio:
+  enabled: false
+

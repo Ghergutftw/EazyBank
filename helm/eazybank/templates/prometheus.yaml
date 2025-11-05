@@ -1,0 +1,115 @@
+{{- if .Values.prometheus.enabled }}
+{{/*
+Prometheus Metrics Server
+Collects and stores metrics from all microservices
+Scrapes Spring Boot Actuator endpoints
+*/}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "eazybank.fullname" . }}-prometheus-config
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "prometheus" "context" .) | nindent 4 }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval:     3s
+      evaluation_interval: 3s
+
+    scrape_configs:
+      {{- if .Values.accounts.enabled }}
+      - job_name: 'accounts'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'accounts:{{ .Values.accounts.service.port }}' ]
+      {{- end }}
+      {{- if .Values.loans.enabled }}
+      - job_name: 'loans'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'loans:{{ .Values.loans.service.port }}' ]
+      {{- end }}
+      {{- if .Values.cards.enabled }}
+      - job_name: 'cards'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'cards:{{ .Values.cards.service.port }}' ]
+      {{- end }}
+      {{- if .Values.gatewayserver.enabled }}
+      - job_name: 'gatewayserver'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'gatewayserver:{{ .Values.gatewayserver.service.port }}' ]
+      {{- end }}
+      {{- if .Values.eurekaserver.enabled }}
+      - job_name: 'eurekaserver'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'eurekaserver:{{ .Values.eurekaserver.service.port }}' ]
+      {{- end }}
+      {{- if .Values.configserver.enabled }}
+      - job_name: 'configserver'
+        metrics_path: '/actuator/prometheus'
+        static_configs:
+          - targets: [ 'configserver:{{ .Values.configserver.service.port }}' ]
+      {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "prometheus" "context" .) | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "eazybank.microservice.selectorLabels" (dict "name" "prometheus" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eazybank.microservice.selectorLabels" (dict "name" "prometheus" "context" .) | nindent 8 }}
+    spec:
+      containers:
+      - name: prometheus
+        image: {{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag | default "latest" }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        args:
+        - --config.file=/etc/prometheus/prometheus.yml
+        - --storage.tsdb.path=/prometheus
+        - --web.console.libraries=/etc/prometheus/console_libraries
+        - --web.console.templates=/etc/prometheus/consoles
+        - --web.enable-lifecycle
+        - --web.enable-remote-write-receiver
+        ports:
+        - containerPort: {{ .Values.prometheus.service.port | default 9090 }}
+        volumeMounts:
+        - name: prometheus-data
+          mountPath: /prometheus
+        - name: prometheus-config
+          mountPath: /etc/prometheus
+      volumes:
+      # Using emptyDir - use PersistentVolume for production
+      - name: prometheus-data
+        emptyDir: {}
+      - name: prometheus-config
+        configMap:
+          name: {{ include "eazybank.fullname" . }}-prometheus-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "prometheus" "context" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "eazybank.microservice.selectorLabels" (dict "name" "prometheus" "context" .) | nindent 4 }}
+  type: {{ .Values.prometheus.service.type | default "ClusterIP" }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.prometheus.service.port | default 9090 }}
+      targetPort: {{ .Values.prometheus.service.port | default 9090 }}
+{{- end }}
+

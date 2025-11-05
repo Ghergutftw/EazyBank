@@ -1,0 +1,71 @@
+{{- if .Values.rabbitmq.enabled }}
+{{/*
+RabbitMQ Message Broker
+Provides reliable message queuing for async communication between microservices
+*/}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "rabbitmq" "context" .) | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "eazybank.microservice.selectorLabels" (dict "name" "rabbitmq" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eazybank.microservice.selectorLabels" (dict "name" "rabbitmq" "context" .) | nindent 8 }}
+    spec:
+      # RabbitMQ requires a stable hostname for clustering
+      hostname: rabbitmq
+      containers:
+      - name: rabbitmq
+        image: {{ include "eazybank.image" (dict "repository" .Values.rabbitmq.image.repository "tag" .Values.rabbitmq.image.tag "context" .) }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        ports:
+        - containerPort: {{ .Values.rabbitmq.service.amqpPort }}
+          name: amqp
+        - containerPort: {{ .Values.rabbitmq.service.managementPort }}
+          name: management
+        livenessProbe:
+          exec:
+            command:
+            - rabbitmq-diagnostics
+            - check_port_connectivity
+          initialDelaySeconds: {{ .Values.rabbitmq.probes.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.rabbitmq.probes.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.rabbitmq.probes.liveness.timeoutSeconds }}
+        readinessProbe:
+          exec:
+            command:
+            - rabbitmq-diagnostics
+            - check_port_connectivity
+          initialDelaySeconds: {{ .Values.rabbitmq.probes.readiness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.rabbitmq.probes.readiness.periodSeconds }}
+          timeoutSeconds: {{ .Values.rabbitmq.probes.readiness.timeoutSeconds }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "rabbitmq" "context" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "eazybank.microservice.selectorLabels" (dict "name" "rabbitmq" "context" .) | nindent 4 }}
+  type: {{ .Values.rabbitmq.service.type }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.rabbitmq.service.amqpPort }}
+      targetPort: {{ .Values.rabbitmq.service.amqpPort }}
+      name: amqp
+    - protocol: TCP
+      port: {{ .Values.rabbitmq.service.managementPort }}
+      targetPort: {{ .Values.rabbitmq.service.managementPort }}
+      name: management
+{{- end }}
+

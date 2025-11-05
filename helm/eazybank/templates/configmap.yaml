@@ -1,0 +1,90 @@
+{{/*
+ConfigMap containing all shared configuration for EazyBank microservices
+This follows the 12-factor app methodology by externalizing configuration
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "eazybank.fullname" . }}-config
+  labels:
+    {{- include "eazybank.labels" . | nindent 4 }}
+data:
+  # ============================================================================
+  # Spring Boot Application Configuration
+  # ============================================================================
+  SPRING_PROFILES_ACTIVE: {{ .Values.config.springProfilesActive | quote }}
+  SPRING_CONFIG_IMPORT: {{ .Values.config.springConfigImport | quote }}
+
+  # ============================================================================
+  # Service Discovery Configuration
+  # ============================================================================
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: {{ .Values.config.eurekaClientServiceUrl | quote }}
+
+  # ============================================================================
+  # Message Broker Configuration
+  # ============================================================================
+  SPRING_RABBITMQ_HOST: {{ .Values.config.rabbitmq.host | quote }}
+  SPRING_CLOUD_STREAM_DEFAULT-BINDER: {{ .Values.config.rabbitmq.defaultBinder | quote }}
+
+  # ============================================================================
+  # Database Configuration
+  # ============================================================================
+  MYSQL_ROOT_PASSWORD: {{ .Values.config.mysql.rootPassword | quote }}
+
+  {{- if .Values.config.observability.enabled }}
+  # ============================================================================
+  # OpenTelemetry Configuration
+  # Distributed tracing and monitoring integration
+  # ============================================================================
+  JAVA_TOOL_OPTIONS: {{ .Values.config.observability.javaToolOptions | quote }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.config.observability.otelExporterEndpoint | quote }}
+  OTEL_METRICS_EXPORTER: {{ .Values.config.observability.otelMetricsExporter | quote }}
+  OTEL_LOGS_EXPORTER: {{ .Values.config.observability.otelLogsExporter | quote }}
+  {{- end }}
+
+  {{- if .Values.keycloak.enabled }}
+  # ============================================================================
+  # Keycloak Configuration
+  # Identity and Access Management
+  # ============================================================================
+  KC_BOOTSTRAP_ADMIN_USERNAME: {{ .Values.config.keycloak.adminUsername | quote }}
+  KC_BOOTSTRAP_ADMIN_PASSWORD: {{ .Values.config.keycloak.adminPassword | quote }}
+  {{- end }}
+
+  {{- if .Values.grafana.enabled }}
+  # ============================================================================
+  # Grafana Configuration
+  # Observability Dashboard
+  # ============================================================================
+  GF_SECURITY_ADMIN_USER: {{ .Values.config.grafana.adminUser | quote }}
+  GF_SECURITY_ADMIN_PASSWORD: {{ .Values.config.grafana.adminPassword | quote }}
+  GF_USERS_ALLOW_SIGN_UP: {{ .Values.config.grafana.allowSignUp | quote }}
+  {{- end }}
+
+  {{- if .Values.minio.enabled }}
+  # ============================================================================
+  # MinIO Configuration
+  # Object Storage for Loki
+  # ============================================================================
+  MINIO_ROOT_USER: {{ .Values.config.minio.rootUser | quote }}
+  MINIO_ROOT_PASSWORD: {{ .Values.config.minio.rootPassword | quote }}
+  MINIO_PROMETHEUS_AUTH_TYPE: {{ .Values.config.minio.prometheusAuthType | quote }}
+  MINIO_UPDATE: {{ .Values.config.minio.update | quote }}
+  {{- end }}
+
+  {{- if .Values.kafka.enabled }}
+  # ============================================================================
+  # Kafka Configuration
+  # Event Streaming Platform
+  # ============================================================================
+  KAFKA_BROKER_ID: {{ .Values.config.kafka.brokerId | quote }}
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: {{ .Values.config.kafka.listenerSecurityProtocolMap | quote }}
+  KAFKA_ADVERTISED_LISTENERS: {{ .Values.config.kafka.advertisedListeners | quote }}
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{ .Values.config.kafka.offsetsTopicReplicationFactor | quote }}
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: {{ .Values.config.kafka.groupInitialRebalanceDelayMs | quote }}
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: {{ .Values.config.kafka.transactionStateLogMinIsr | quote }}
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: {{ .Values.config.kafka.transactionStateLogReplicationFactor | quote }}
+  KAFKA_PROCESS_ROLES: {{ .Values.config.kafka.processRoles | quote }}
+  KAFKA_NODE_ID: {{ .Values.config.kafka.nodeId | quote }}
+  {{- end }}
+

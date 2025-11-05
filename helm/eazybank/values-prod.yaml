@@ -1,0 +1,104 @@
+# Production Environment Configuration
+# Use this file with: helm install eazybank . -f values-prod.yaml
+
+# Production profile configuration
+config:
+  springProfilesActive: "prod"
+
+# Gateway server with LoadBalancer for production
+gatewayserver:
+  replicaCount: 2
+  service:
+    type: LoadBalancer
+  # Enable Ingress for production with TLS
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/rate-limit: "100"
+    hosts:
+      - host: api.eazybank.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: gateway-tls
+        hosts:
+          - api.eazybank.com
+
+# Scale microservices for production load
+accounts:
+  replicaCount: 3
+  resources:
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+    requests:
+      memory: "768Mi"
+      cpu: "500m"
+
+loans:
+  replicaCount: 3
+  resources:
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+    requests:
+      memory: "768Mi"
+      cpu: "500m"
+
+cards:
+  replicaCount: 3
+  resources:
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+    requests:
+      memory: "768Mi"
+      cpu: "500m"
+
+# Infrastructure services with higher resources
+configserver:
+  replicaCount: 2
+  resources:
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+    requests:
+      memory: "768Mi"
+      cpu: "250m"
+
+eurekaserver:
+  replicaCount: 2
+  resources:
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+    requests:
+      memory: "768Mi"
+      cpu: "250m"
+
+# Enable full observability stack for production
+prometheus:
+  enabled: true
+  service:
+    type: ClusterIP
+
+grafana:
+  enabled: true
+  service:
+    type: ClusterIP  # Use with Ingress
+
+# Enable distributed tracing in production
+tempo:
+  enabled: true
+
+# Enable object storage for Loki (if Loki is used)
+minio:
+  enabled: false
+
+# Loki for log aggregation (optional, resource intensive)
+loki:
+  enabled: false
+

@@ -1,0 +1,61 @@
+{{- if .Values.keycloak.enabled }}
+{{/*
+Keycloak - Identity and Access Management
+Provides OAuth2/OIDC authentication and authorization
+Runs in development mode - configure properly for production
+*/}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "keycloak" "context" .) | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "eazybank.microservice.selectorLabels" (dict "name" "keycloak" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eazybank.microservice.selectorLabels" (dict "name" "keycloak" "context" .) | nindent 8 }}
+    spec:
+      containers:
+      - name: keycloak
+        image: {{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag | default "latest" }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        # WARNING: start-dev is for development only!
+        # Use proper configuration with database for production
+        args: ["start-dev"]
+        env:
+        - name: KC_BOOTSTRAP_ADMIN_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "eazybank.fullname" . }}-config
+              key: KC_BOOTSTRAP_ADMIN_USERNAME
+        - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "eazybank.fullname" . }}-config
+              key: KC_BOOTSTRAP_ADMIN_PASSWORD
+        ports:
+        - name: http
+          containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "keycloak" "context" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "eazybank.microservice.selectorLabels" (dict "name" "keycloak" "context" .) | nindent 4 }}
+  type: {{ .Values.keycloak.service.type | default "LoadBalancer" }}
+  ports:
+    - name: http
+      port: {{ .Values.keycloak.service.port | default 7080 }}
+      targetPort: 8080
+{{- end }}
+

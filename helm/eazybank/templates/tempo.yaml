@@ -1,0 +1,121 @@
+{{- if .Values.tempo.enabled }}
+{{/*
+Grafana Tempo - Distributed Tracing Backend
+Receives traces via OpenTelemetry protocol
+Stores and queries distributed traces
+*/}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "eazybank.fullname" . }}-tempo-config
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "tempo" "context" .) | nindent 4 }}
+data:
+  tempo.yaml: |
+    server:
+      http_listen_port: 3200
+
+    distributor:
+      receivers:
+        # OpenTelemetry receivers for trace ingestion
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+
+    ingester:
+      trace_idle_period: 10s
+      max_block_bytes: 1_000_000
+      max_block_duration: 5m
+
+    compactor:
+      compaction:
+        compaction_window: 1h
+        max_compaction_objects: 1000000
+        block_retention: 1h
+        compacted_block_retention: 10m
+
+    storage:
+      trace:
+        backend: local
+        local:
+          path: /var/tempo/blocks
+        pool:
+          max_workers: 100
+          queue_depth: 10000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "tempo" "context" .) | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "eazybank.microservice.selectorLabels" (dict "name" "tempo" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eazybank.microservice.selectorLabels" (dict "name" "tempo" "context" .) | nindent 8 }}
+    spec:
+      # Run as root for local storage access
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      containers:
+      - name: tempo
+        image: {{ .Values.tempo.image.repository }}:{{ .Values.tempo.image.tag | default "latest" }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        args:
+        - -config.file=/etc/tempo.yaml
+        ports:
+        - containerPort: 3200
+          name: http
+        - containerPort: 4317
+          name: otlp-grpc
+        - containerPort: 4318
+          name: otlp-http
+        volumeMounts:
+        - name: tempo-data
+          mountPath: /var/tempo
+        - name: tempo-config
+          mountPath: /etc/tempo.yaml
+          subPath: tempo.yaml
+      volumes:
+      # Using emptyDir - use PersistentVolume for production
+      - name: tempo-data
+        emptyDir: {}
+      - name: tempo-config
+        configMap:
+          name: {{ include "eazybank.fullname" . }}-tempo-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "tempo" "context" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "eazybank.microservice.selectorLabels" (dict "name" "tempo" "context" .) | nindent 4 }}
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 3200
+      targetPort: 3200
+      name: http
+    - protocol: TCP
+      port: 4317
+      targetPort: 4317
+      name: otlp-grpc
+    - protocol: TCP
+      port: 4318
+      targetPort: 4318
+      name: otlp-http
+{{- end }}
+

@@ -1,0 +1,116 @@
+{{- if .Values.minio.enabled }}
+{{/*
+MinIO Object Storage
+Used by Loki for log storage backend
+Provides S3-compatible API for distributed storage
+*/}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "minio" "context" .) | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "eazybank.microservice.selectorLabels" (dict "name" "minio" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eazybank.microservice.selectorLabels" (dict "name" "minio" "context" .) | nindent 8 }}
+    spec:
+      containers:
+      - name: minio
+        image: {{ .Values.minio.image.repository }}:{{ .Values.minio.image.tag | default "latest" }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        args:
+        - server
+        - /data
+        ports:
+        - containerPort: {{ .Values.minio.service.port | default 9000 }}
+        env:
+        - name: MINIO_ROOT_USER
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "eazybank.fullname" . }}-config
+              key: MINIO_ROOT_USER
+        - name: MINIO_ROOT_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "eazybank.fullname" . }}-config
+              key: MINIO_ROOT_PASSWORD
+        - name: MINIO_PROMETHEUS_AUTH_TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "eazybank.fullname" . }}-config
+              key: MINIO_PROMETHEUS_AUTH_TYPE
+        - name: MINIO_UPDATE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "eazybank.fullname" . }}-config
+              key: MINIO_UPDATE
+        livenessProbe:
+          httpGet:
+            path: /minio/health/live
+            port: 9000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 20
+        volumeMounts:
+        - name: minio-data
+          mountPath: /data
+      volumes:
+      # Using emptyDir for simplicity - use PersistentVolume in production
+      - name: minio-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "minio" "context" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "eazybank.microservice.selectorLabels" (dict "name" "minio" "context" .) | nindent 4 }}
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.minio.service.port | default 9000 }}
+      targetPort: {{ .Values.minio.service.port | default 9000 }}
+---
+{{/*
+Job to initialize MinIO buckets for Loki
+Creates required buckets after MinIO is ready
+*/}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "eazybank.fullname" . }}-minio-setup
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "minio-setup" "context" .) | nindent 4 }}
+  annotations:
+    # Recreate job on helm upgrade
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: mc
+        image: minio/mc:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          sleep 10
+          mc alias set myminio http://minio:9000 {{ .Values.config.minio.rootUser }} {{ .Values.config.minio.rootPassword }}
+          mc mb myminio/loki-data --ignore-existing
+          mc mb myminio/loki-ruler --ignore-existing
+          echo "MinIO buckets created successfully"
+{{- end }}
+

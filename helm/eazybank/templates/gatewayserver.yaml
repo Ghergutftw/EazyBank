@@ -1,0 +1,95 @@
+{{- if .Values.gatewayserver.enabled }}
+{{/*
+Spring Cloud Gateway Server
+API Gateway providing routing, rate limiting, and circuit breaking
+Acts as single entry point for all client requests
+*/}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatewayserver
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "gatewayserver" "context" .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.gatewayserver.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "eazybank.microservice.selectorLabels" (dict "name" "gatewayserver" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eazybank.microservice.selectorLabels" (dict "name" "gatewayserver" "context" .) | nindent 8 }}
+    spec:
+      containers:
+      - name: gatewayserver
+        image: {{ include "eazybank.image" (dict "repository" .Values.gatewayserver.image.repository "tag" .Values.gatewayserver.image.tag "context" .) }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        ports:
+        - containerPort: {{ .Values.gatewayserver.containerPort }}
+        env:
+        {{- include "eazybank.springboot.env" . | nindent 8 }}
+        {{- include "eazybank.resources" .Values.gatewayserver.resources | nindent 8 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatewayserver
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "gatewayserver" "context" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "eazybank.microservice.selectorLabels" (dict "name" "gatewayserver" "context" .) | nindent 4 }}
+  type: {{ .Values.gatewayserver.service.type }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.gatewayserver.service.port }}
+      targetPort: {{ .Values.gatewayserver.containerPort }}
+---
+{{- if .Values.gatewayserver.ingress.enabled }}
+{{/*
+Ingress for production environments
+Provides external HTTPS access with TLS termination
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gatewayserver
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "gatewayserver" "context" .) | nindent 4 }}
+  {{- with .Values.gatewayserver.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.gatewayserver.ingress.className }}
+  ingressClassName: {{ .Values.gatewayserver.ingress.className }}
+  {{- end }}
+  {{- if .Values.gatewayserver.ingress.tls }}
+  tls:
+    {{- range .Values.gatewayserver.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.gatewayserver.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: gatewayserver
+                port:
+                  number: {{ $.Values.gatewayserver.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}
+

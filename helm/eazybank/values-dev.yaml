@@ -1,0 +1,86 @@
+# Development Environment Configuration
+# Use this file with: helm install eazybank . -f values-dev.yaml
+
+# Development profile
+config:
+  springProfilesActive: "default"
+
+# Use NodePort for easy local access
+gatewayserver:
+  replicaCount: 1
+  service:
+    type: NodePort
+  ingress:
+    enabled: false
+
+# Minimal replicas for development
+accounts:
+  replicaCount: 1
+  resources:
+    limits:
+      memory: "512Mi"
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+
+loans:
+  replicaCount: 1
+  resources:
+    limits:
+      memory: "512Mi"
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+
+cards:
+  replicaCount: 1
+  resources:
+    limits:
+      memory: "512Mi"
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+
+configserver:
+  replicaCount: 1
+  resources:
+    limits:
+      memory: "512Mi"
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+
+eurekaserver:
+  replicaCount: 1
+  resources:
+    limits:
+      memory: "512Mi"
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+
+# Enable basic monitoring for development (Prometheus + Grafana)
+prometheus:
+  enabled: true
+
+grafana:
+  enabled: true
+  service:
+    type: NodePort  # Easier access in dev
+
+# Disable resource-intensive components for development
+loki:
+  enabled: false
+
+tempo:
+  enabled: false
+
+minio:
+  enabled: false
+
+keycloak:
+  enabled: false
+
+kafka:
+  enabled: false
+

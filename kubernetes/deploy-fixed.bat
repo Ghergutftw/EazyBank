@@ -1,5 +1,3 @@
-
-
 echo [1/13] Deploying Kubernetes Dashboard...
 kubectl delete secret kubernetes-dashboard-csrf -n kubernetes-dashboard 2>nul
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
@@ -9,9 +7,9 @@ echo kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-
 
 
 echo [2/13] Deploying Dashboard Admin User...
-kubectl apply -f ../utils/dashboard-adminuser.yaml
-kubectl apply -f ../utils/dashboard-rolebinding.yaml
-kubectl apply -f ../utils/secret-adminuser.yaml
+kubectl apply -f dashboard-adminuser.yaml
+kubectl apply -f dashboard-rolebinding.yaml
+kubectl apply -f secret-adminuser.yaml
 
 kubectl -n kubernetes-dashboard create token admin-user
 
