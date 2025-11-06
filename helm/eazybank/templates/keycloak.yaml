@@ -10,16 +10,16 @@ kind: Deployment
 metadata:
   name: keycloak
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "keycloak" "context" .) | nindent 4 }}
+    app: keycloak
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "keycloak" "context" .) | nindent 6 }}
+      app: keycloak
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "keycloak" "context" .) | nindent 8 }}
+        app: keycloak
     spec:
       containers:
       - name: keycloak
@@ -32,12 +32,12 @@ spec:
         - name: KC_BOOTSTRAP_ADMIN_USERNAME
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KC_BOOTSTRAP_ADMIN_USERNAME
         - name: KC_BOOTSTRAP_ADMIN_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KC_BOOTSTRAP_ADMIN_PASSWORD
         ports:
         - name: http
@@ -48,10 +48,10 @@ kind: Service
 metadata:
   name: keycloak
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "keycloak" "context" .) | nindent 4 }}
+    app: keycloak
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "keycloak" "context" .) | nindent 4 }}
+    app: keycloak
   type: {{ .Values.keycloak.service.type | default "LoadBalancer" }}
   ports:
     - name: http

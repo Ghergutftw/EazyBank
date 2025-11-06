@@ -33,12 +33,12 @@ spec:
         - name: SPRING_PROFILES_ACTIVE
           valueFrom:
             configMapKeyRef:
-              name: eazybank-configmap
+              name: eazybank-config
               key: SPRING_PROFILES_ACTIVE
         - name: SPRING_CONFIG_IMPORT
           valueFrom:
             configMapKeyRef:
-              name: eazybank-configmap
+              name: eazybank-config
               key: SPRING_CONFIG_IMPORT
         resources:
           limits:

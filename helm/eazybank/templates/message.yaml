@@ -27,7 +27,7 @@ spec:
         - name: SPRING_RABBITMQ_HOST
           valueFrom:
             configMapKeyRef:
-              name: eazybank-configmap
+              name: eazybank-config
               key: SPRING_RABBITMQ_HOST
         resources:
           limits:

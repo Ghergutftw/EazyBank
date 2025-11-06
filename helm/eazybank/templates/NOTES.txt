@@ -205,7 +205,7 @@ Debug Pod Issues:
 
 Check Configuration:
   # View ConfigMap
-  kubectl get configmap {{ include "eazybank.fullname" . }}-config -n {{ .Release.Namespace }} -o yaml
+  kubectl get configmap eazybank-config -n {{ .Release.Namespace }} -o yaml
 
   # Check environment variables
   kubectl exec deployment/accounts -n {{ .Release.Namespace }} -- env | grep SPRING

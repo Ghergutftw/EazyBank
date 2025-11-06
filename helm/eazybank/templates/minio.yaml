@@ -10,16 +10,16 @@ kind: Deployment
 metadata:
   name: minio
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "minio" "context" .) | nindent 4 }}
+    app: minio
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "minio" "context" .) | nindent 6 }}
+      app: minio
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "minio" "context" .) | nindent 8 }}
+        app: minio
     spec:
       containers:
       - name: minio
@@ -34,22 +34,22 @@ spec:
         - name: MINIO_ROOT_USER
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: MINIO_ROOT_USER
         - name: MINIO_ROOT_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: MINIO_ROOT_PASSWORD
         - name: MINIO_PROMETHEUS_AUTH_TYPE
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: MINIO_PROMETHEUS_AUTH_TYPE
         - name: MINIO_UPDATE
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: MINIO_UPDATE
         livenessProbe:
           httpGet:
@@ -71,10 +71,10 @@ kind: Service
 metadata:
   name: minio
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "minio" "context" .) | nindent 4 }}
+    app: minio
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "minio" "context" .) | nindent 4 }}
+    app: minio
   type: ClusterIP
   ports:
     - protocol: TCP
@@ -88,9 +88,9 @@ Creates required buckets after MinIO is ready
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "eazybank.fullname" . }}-minio-setup
+  name: eazybank-minio-setup
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "minio-setup" "context" .) | nindent 4 }}
+    app: minio-setup
   annotations:
     # Recreate job on helm upgrade
     "helm.sh/hook": post-install,post-upgrade

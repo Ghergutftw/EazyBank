@@ -10,14 +10,14 @@ kind: ServiceAccount
 metadata:
   name: alloy
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+    app: alloy
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: alloy
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+    app: alloy
 rules:
 - apiGroups: [""]
   resources:
@@ -26,6 +26,7 @@ rules:
   - services
   - endpoints
   - pods
+  - pods/log
   verbs: ["get", "list", "watch"]
 - apiGroups:
   - extensions
@@ -38,7 +39,7 @@ kind: ClusterRoleBinding
 metadata:
   name: alloy
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+    app: alloy
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -53,7 +54,7 @@ kind: ConfigMap
 metadata:
   name: alloy-config
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+    app: alloy
 data:
   config.alloy: |
     // Kubernetes service discovery for logs
@@ -174,16 +175,16 @@ kind: Deployment
 metadata:
   name: alloy
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+    app: alloy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "alloy" "context" .) | nindent 6 }}
+      app: alloy
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "alloy" "context" .) | nindent 8 }}
+        app: alloy
     spec:
       serviceAccountName: alloy
       containers:
@@ -222,10 +223,10 @@ kind: Service
 metadata:
   name: alloy
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+    app: alloy
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "alloy" "context" .) | nindent 4 }}
+    app: alloy
   type: ClusterIP
   ports:
     - protocol: TCP

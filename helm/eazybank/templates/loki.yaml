@@ -9,7 +9,7 @@ kind: ConfigMap
 metadata:
   name: loki-config
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki" "context" .) | nindent 4 }}
+    app: loki
 data:
   config.yaml: |
     server:
@@ -64,16 +64,16 @@ kind: Deployment
 metadata:
   name: loki-read
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki-read" "context" .) | nindent 4 }}
+    app: loki-read
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-read" "context" .) | nindent 6 }}
+      app: loki-read
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-read" "context" .) | nindent 8 }}
+        app: loki-read
     spec:
       containers:
       - name: loki-read
@@ -102,10 +102,10 @@ kind: Service
 metadata:
   name: loki-read
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki-read" "context" .) | nindent 4 }}
+    app: loki-read
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-read" "context" .) | nindent 4 }}
+    app: loki-read
   type: ClusterIP
   ports:
     - protocol: TCP
@@ -122,16 +122,16 @@ kind: Deployment
 metadata:
   name: loki-write
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki-write" "context" .) | nindent 4 }}
+    app: loki-write
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-write" "context" .) | nindent 6 }}
+      app: loki-write
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-write" "context" .) | nindent 8 }}
+        app: loki-write
     spec:
       containers:
       - name: loki-write
@@ -160,10 +160,10 @@ kind: Service
 metadata:
   name: loki-write
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki-write" "context" .) | nindent 4 }}
+    app: loki-write
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-write" "context" .) | nindent 4 }}
+    app: loki-write
   type: ClusterIP
   ports:
     - protocol: TCP
@@ -180,16 +180,16 @@ kind: Deployment
 metadata:
   name: loki-backend
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki-backend" "context" .) | nindent 4 }}
+    app: loki-backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-backend" "context" .) | nindent 6 }}
+      app: loki-backend
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-backend" "context" .) | nindent 8 }}
+        app: loki-backend
     spec:
       containers:
       - name: loki-backend
@@ -217,10 +217,10 @@ kind: Service
 metadata:
   name: loki-backend
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki-backend" "context" .) | nindent 4 }}
+    app: loki-backend
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-backend" "context" .) | nindent 4 }}
+    app: loki-backend
   type: ClusterIP
   ports:
     - protocol: TCP
@@ -237,7 +237,7 @@ kind: ConfigMap
 metadata:
   name: loki-gateway-config
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki-gateway" "context" .) | nindent 4 }}
+    app: loki-gateway
 data:
   nginx.conf: |
     worker_processes  5;
@@ -338,16 +338,16 @@ kind: Deployment
 metadata:
   name: loki-gateway
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki-gateway" "context" .) | nindent 4 }}
+    app: loki-gateway
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-gateway" "context" .) | nindent 6 }}
+      app: loki-gateway
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-gateway" "context" .) | nindent 8 }}
+        app: loki-gateway
     spec:
       containers:
       - name: nginx
@@ -369,10 +369,10 @@ kind: Service
 metadata:
   name: loki-gateway
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loki-gateway" "context" .) | nindent 4 }}
+    app: loki-gateway
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "loki-gateway" "context" .) | nindent 4 }}
+    app: loki-gateway
   type: ClusterIP
   ports:
     - protocol: TCP

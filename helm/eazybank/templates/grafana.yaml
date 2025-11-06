@@ -21,6 +21,23 @@ data:
         isDefault: true
         editable: true
       {{- end }}
+      {{- if .Values.loki.enabled }}
+      - name: Loki
+        type: loki
+        uid: loki
+        url: http://loki-gateway:{{ .Values.loki.service.port }}
+        access: proxy
+        editable: true
+        jsonData:
+          httpHeaderName1: 'X-Scope-OrgID'
+          derivedFields:
+            - datasourceUid: tempo
+              matcherRegex: "traceID=(\\w+)"
+              name: TraceID
+              url: "$${__value.raw}"
+        secureJsonData:
+          httpHeaderValue1: 'tenant1'
+      {{- end }}
       {{- if .Values.tempo.enabled }}
       - name: Tempo
         type: tempo
@@ -56,17 +73,17 @@ spec:
         - name: GF_SECURITY_ADMIN_USER
           valueFrom:
             configMapKeyRef:
-              name: eazybank-configmap
+              name: eazybank-config
               key: GF_SECURITY_ADMIN_USER
         - name: GF_SECURITY_ADMIN_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: eazybank-configmap
+              name: eazybank-config
               key: GF_SECURITY_ADMIN_PASSWORD
         - name: GF_USERS_ALLOW_SIGN_UP
           valueFrom:
             configMapKeyRef:
-              name: eazybank-configmap
+              name: eazybank-config
               key: GF_USERS_ALLOW_SIGN_UP
         volumeMounts:
         - name: grafana-data

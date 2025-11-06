@@ -8,9 +8,9 @@ Stores and queries distributed traces
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "eazybank.fullname" . }}-tempo-config
+  name: eazybank-tempo-config
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "tempo" "context" .) | nindent 4 }}
+    app: tempo
 data:
   tempo.yaml: |
     server:
@@ -52,16 +52,16 @@ kind: Deployment
 metadata:
   name: tempo
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "tempo" "context" .) | nindent 4 }}
+    app: tempo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "tempo" "context" .) | nindent 6 }}
+      app: tempo
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "tempo" "context" .) | nindent 8 }}
+        app: tempo
     spec:
       # Run as root for local storage access
       securityContext:
@@ -92,17 +92,17 @@ spec:
         emptyDir: {}
       - name: tempo-config
         configMap:
-          name: {{ include "eazybank.fullname" . }}-tempo-config
+          name: eazybank-tempo-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: tempo
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "tempo" "context" .) | nindent 4 }}
+    app: tempo
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "tempo" "context" .) | nindent 4 }}
+    app: tempo
   type: ClusterIP
   ports:
     - protocol: TCP

@@ -30,7 +30,7 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: eazybank-configmap
+              name: eazybank-config
               key: MYSQL_ROOT_PASSWORD
         livenessProbe:
           exec:
@@ -99,7 +99,7 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: eazybank-configmap
+              name: eazybank-config
               key: MYSQL_ROOT_PASSWORD
         livenessProbe:
           exec:
@@ -168,7 +168,7 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: eazybank-configmap
+              name: eazybank-config
               key: MYSQL_ROOT_PASSWORD
         livenessProbe:
           exec:

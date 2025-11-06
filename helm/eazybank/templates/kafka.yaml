@@ -10,16 +10,16 @@ kind: Deployment
 metadata:
   name: kafka
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "kafka" "context" .) | nindent 4 }}
+    app: kafka
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "kafka" "context" .) | nindent 6 }}
+      app: kafka
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "kafka" "context" .) | nindent 8 }}
+        app: kafka
     spec:
       # Kafka requires stable hostname for clustering
       hostname: kafka
@@ -38,77 +38,77 @@ spec:
         - name: KAFKA_BROKER_ID
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_BROKER_ID
         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
         - name: KAFKA_ADVERTISED_LISTENERS
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_ADVERTISED_LISTENERS
         - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
         - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
         - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
         - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
         - name: KAFKA_PROCESS_ROLES
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_PROCESS_ROLES
         - name: KAFKA_NODE_ID
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_NODE_ID
         - name: KAFKA_CONTROLLER_QUORUM_VOTERS
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_CONTROLLER_QUORUM_VOTERS
         - name: KAFKA_LISTENERS
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_LISTENERS
         - name: KAFKA_INTER_BROKER_LISTENER_NAME
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_INTER_BROKER_LISTENER_NAME
         - name: KAFKA_CONTROLLER_LISTENER_NAMES
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_CONTROLLER_LISTENER_NAMES
         - name: KAFKA_LOG_DIRS
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: KAFKA_LOG_DIRS
         - name: CLUSTER_ID
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-config
               key: CLUSTER_ID
         {{- if .Values.kafka.extraEnv }}
         # Additional Kafka configuration from values
@@ -135,10 +135,10 @@ kind: Service
 metadata:
   name: kafka
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "kafka" "context" .) | nindent 4 }}
+    app: kafka
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "kafka" "context" .) | nindent 4 }}
+    app: kafka
   type: {{ .Values.kafka.service.type | default "ClusterIP" }}
   ports:
     - protocol: TCP
