@@ -458,7 +458,7 @@ keycloak:
     tag: "26.4.0"
   service:
     type: LoadBalancer
-    port: 7080
+    port: 8080
 
 # Kafka - Event streaming platform
 kafka:

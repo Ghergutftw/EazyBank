@@ -29,14 +29,14 @@ data:
         access: proxy
         editable: true
         jsonData:
-          httpHeaderName1: 'X-Scope-OrgID'
+          httpHeaderName1: "X-Scope-OrgID"
           derivedFields:
             - datasourceUid: tempo
-              matcherRegex: "traceID=(\\w+)"
+              matcherRegex: "\[.+,(.+),.+\]"
               name: TraceID
-              url: "$${__value.raw}"
+              url: '${__value.raw}'
         secureJsonData:
-          httpHeaderValue1: 'tenant1'
+          httpHeaderValue1: "tenant1"
       {{- end }}
       {{- if .Values.tempo.enabled }}
       - name: Tempo

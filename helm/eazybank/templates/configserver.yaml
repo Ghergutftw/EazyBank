@@ -27,6 +27,31 @@ spec:
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.configserver.containerPort }}
+        {{- if .Values.config.observability.enabled }}
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-config
+              key: JAVA_TOOL_OPTIONS
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
+        - name: OTEL_METRICS_EXPORTER
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-config
+              key: OTEL_METRICS_EXPORTER
+        - name: OTEL_LOGS_EXPORTER
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-config
+              key: OTEL_LOGS_EXPORTER
+        - name: OTEL_SERVICE_NAME
+          value: "configserver"
+        {{- end }}
         resources:
           limits:
             memory: {{ .Values.configserver.resources.limits.memory }}

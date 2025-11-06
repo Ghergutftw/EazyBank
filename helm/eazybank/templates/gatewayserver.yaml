@@ -23,6 +23,16 @@ spec:
         tier: {{ .Values.gatewayserver.labels.tier }}
         {{- end }}
     spec:
+      initContainers:
+      - name: wait-for-configserver
+        image: busybox:1.36
+        command: ['sh', '-c', 'until nc -z configserver 8071; do echo waiting for configserver; sleep 2; done;']
+      - name: wait-for-eurekaserver
+        image: busybox:1.36
+        command: ['sh', '-c', 'until nc -z eurekaserver 8761; do echo waiting for eurekaserver; sleep 2; done;']
+      - name: wait-for-keycloak
+        image: busybox:1.36
+        command: ['sh', '-c', 'until nc -z keycloak 8080; do echo waiting for keycloak; sleep 2; done;']
       containers:
       - name: gatewayserver
         image: {{ .Values.gatewayserver.image.repository }}:{{ .Values.gatewayserver.image.tag }}
@@ -50,6 +60,30 @@ spec:
             configMapKeyRef:
               name: eazybank-config
               key: SPRING_RABBITMQ_HOST
+        {{- if .Values.config.observability.enabled }}
+        - name: JAVA_TOOL_OPTIONS
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-config
+              key: JAVA_TOOL_OPTIONS
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
+        - name: OTEL_METRICS_EXPORTER
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-config
+              key: OTEL_METRICS_EXPORTER
+        - name: OTEL_LOGS_EXPORTER
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-config
+              key: OTEL_LOGS_EXPORTER
+        - name: OTEL_SERVICE_NAME
+          value: "gatewayserver"
+        {{- end }}
         resources:
           limits:
             memory: {{ .Values.gatewayserver.resources.limits.memory }}

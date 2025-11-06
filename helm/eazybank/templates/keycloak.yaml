@@ -55,7 +55,7 @@ spec:
   type: {{ .Values.keycloak.service.type | default "LoadBalancer" }}
   ports:
     - name: http
-      port: {{ .Values.keycloak.service.port | default 7080 }}
+      port: 8080
       targetPort: 8080
 {{- end }}
 
