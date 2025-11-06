@@ -18,11 +18,10 @@ data:
   # Spring Cloud Stream - Set RabbitMQ as default binder
   SPRING_CLOUD_STREAM_DEFAULT-BINDER: "rabbit"
 
-  # OpenTelemetry (disabled by default - enable when observability stack is deployed)
-  # JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
-  # OTEL_EXPORTER_OTLP_ENDPOINT: "http://tempo:4318"
-  # OTEL_METRICS_EXPORTER: "none"
-  # OTEL_LOGS_EXPORTER: "none"
+  JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://tempo:4318"
+  OTEL_METRICS_EXPORTER: "none"
+  OTEL_LOGS_EXPORTER: "none"
 
   # Keycloak
   KC_BOOTSTRAP_ADMIN_USERNAME: "admin"

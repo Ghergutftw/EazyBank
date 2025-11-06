@@ -1,16 +1,12 @@
 {{- if .Values.prometheus.enabled }}
-{{/*
-Prometheus Metrics Server
-Collects and stores metrics from all microservices
-Scrapes Spring Boot Actuator endpoints
-*/}}
+# Prometheus - collects metrics from all Spring Boot microservices
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "eazybank.fullname" . }}-prometheus-config
+  name: prometheus-config
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "prometheus" "context" .) | nindent 4 }}
+    app: prometheus
 data:
   prometheus.yml: |
     global:
@@ -60,20 +56,20 @@ kind: Deployment
 metadata:
   name: prometheus
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "prometheus" "context" .) | nindent 4 }}
+    app: prometheus
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "prometheus" "context" .) | nindent 6 }}
+      app: prometheus
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "prometheus" "context" .) | nindent 8 }}
+        app: prometheus
     spec:
       containers:
       - name: prometheus
-        image: {{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag | default "latest" }}
+        image: {{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         args:
         - --config.file=/etc/prometheus/prometheus.yml
@@ -83,33 +79,32 @@ spec:
         - --web.enable-lifecycle
         - --web.enable-remote-write-receiver
         ports:
-        - containerPort: {{ .Values.prometheus.service.port | default 9090 }}
+        - containerPort: {{ .Values.prometheus.service.port }}
         volumeMounts:
         - name: prometheus-data
           mountPath: /prometheus
         - name: prometheus-config
           mountPath: /etc/prometheus
       volumes:
-      # Using emptyDir - use PersistentVolume for production
       - name: prometheus-data
         emptyDir: {}
       - name: prometheus-config
         configMap:
-          name: {{ include "eazybank.fullname" . }}-prometheus-config
+          name: prometheus-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "prometheus" "context" .) | nindent 4 }}
+    app: prometheus
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "prometheus" "context" .) | nindent 4 }}
-  type: {{ .Values.prometheus.service.type | default "ClusterIP" }}
+    app: prometheus
+  type: {{ .Values.prometheus.service.type }}
   ports:
     - protocol: TCP
-      port: {{ .Values.prometheus.service.port | default 9090 }}
-      targetPort: {{ .Values.prometheus.service.port | default 9090 }}
+      port: {{ .Values.prometheus.service.port }}
+      targetPort: {{ .Values.prometheus.service.port }}
 {{- end }}
 

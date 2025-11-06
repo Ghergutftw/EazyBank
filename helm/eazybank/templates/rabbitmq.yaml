@@ -1,30 +1,26 @@
 {{- if .Values.rabbitmq.enabled }}
-{{/*
-RabbitMQ Message Broker
-Provides reliable message queuing for async communication between microservices
-*/}}
+# RabbitMQ - message broker for async communication
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbitmq
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "rabbitmq" "context" .) | nindent 4 }}
+    app: rabbitmq
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "rabbitmq" "context" .) | nindent 6 }}
+      app: rabbitmq
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "rabbitmq" "context" .) | nindent 8 }}
+        app: rabbitmq
     spec:
-      # RabbitMQ requires a stable hostname for clustering
       hostname: rabbitmq
       containers:
       - name: rabbitmq
-        image: {{ include "eazybank.image" (dict "repository" .Values.rabbitmq.image.repository "tag" .Values.rabbitmq.image.tag "context" .) }}
+        image: {{ .Values.rabbitmq.image.repository }}:{{ .Values.rabbitmq.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.rabbitmq.service.amqpPort }}
@@ -53,10 +49,10 @@ kind: Service
 metadata:
   name: rabbitmq
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "rabbitmq" "context" .) | nindent 4 }}
+    app: rabbitmq
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "rabbitmq" "context" .) | nindent 4 }}
+    app: rabbitmq
   type: {{ .Values.rabbitmq.service.type }}
   ports:
     - protocol: TCP

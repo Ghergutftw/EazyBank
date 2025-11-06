@@ -1,48 +1,65 @@
 {{- if .Values.configserver.enabled }}
-{{/*
-Spring Cloud Config Server
-Provides centralized external configuration management for all microservices
-Implements 12-factor app methodology for configuration
-*/}}
+# Config Server - centralized configuration management
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: configserver
+  name: {{ .Values.configserver.service.name }}
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "configserver" "context" .) | nindent 4 }}
+    app: {{ .Values.configserver.labels.app }}
+    tier: {{ .Values.configserver.labels.tier }}
 spec:
   replicas: {{ .Values.configserver.replicaCount }}
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "configserver" "context" .) | nindent 6 }}
+      app: {{ .Values.configserver.labels.app }}
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "configserver" "context" .) | nindent 8 }}
+        app: {{ .Values.configserver.labels.app }}
+        {{- if .Values.configserver.labels.tier }}
+        tier: {{ .Values.configserver.labels.tier }}
+        {{- end }}
     spec:
       containers:
       - name: configserver
-        image: {{ include "eazybank.image" (dict "repository" .Values.configserver.image.repository "tag" .Values.configserver.image.tag "context" .) }}
+        image: {{ .Values.configserver.image.repository }}:{{ .Values.configserver.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.configserver.containerPort }}
-        {{- include "eazybank.resources" .Values.configserver.resources | nindent 8 }}
-        {{- include "eazybank.springboot.livenessProbe" (dict "path" .Values.configserver.probes.liveness.path "port" .Values.configserver.containerPort "initialDelay" .Values.configserver.probes.liveness.initialDelaySeconds "period" .Values.configserver.probes.liveness.periodSeconds "timeout" .Values.configserver.probes.liveness.timeoutSeconds "failureThreshold" 3) | nindent 8 }}
-        {{- include "eazybank.springboot.readinessProbe" (dict "path" .Values.configserver.probes.readiness.path "port" .Values.configserver.containerPort "initialDelay" .Values.configserver.probes.readiness.initialDelaySeconds "period" .Values.configserver.probes.readiness.periodSeconds "timeout" .Values.configserver.probes.readiness.timeoutSeconds "failureThreshold" 3) | nindent 8 }}
+        resources:
+          limits:
+            memory: {{ .Values.configserver.resources.limits.memory }}
+          requests:
+            memory: {{ .Values.configserver.resources.requests.memory }}
+            cpu: {{ .Values.configserver.resources.requests.cpu }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.configserver.probes.liveness.path }}
+            port: {{ .Values.configserver.containerPort }}
+          initialDelaySeconds: {{ .Values.configserver.probes.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.configserver.probes.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.configserver.probes.liveness.timeoutSeconds }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.configserver.probes.readiness.path }}
+            port: {{ .Values.configserver.containerPort }}
+          initialDelaySeconds: {{ .Values.configserver.probes.readiness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.configserver.probes.readiness.periodSeconds }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: configserver
+  name: {{ .Values.configserver.service.name }}
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "configserver" "context" .) | nindent 4 }}
+    app: {{ .Values.configserver.labels.app }}
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "configserver" "context" .) | nindent 4 }}
+    app: {{ .Values.configserver.labels.app }}
   type: {{ .Values.configserver.service.type }}
   ports:
     - protocol: TCP
+      name: http
       port: {{ .Values.configserver.service.port }}
       targetPort: {{ .Values.configserver.containerPort }}
 {{- end }}

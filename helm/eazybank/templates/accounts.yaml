@@ -1,50 +1,96 @@
 {{- if .Values.accounts.enabled }}
-{{/*
-Accounts Microservice
-Manages customer account operations
-Demonstrates standard Spring Boot microservice pattern
-*/}}
+# Accounts Microservice - manages customer account operations
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: accounts
+  name: {{ .Values.accounts.service.name }}
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "accounts" "context" .) | nindent 4 }}
+    app: {{ .Values.accounts.labels.app }}
+    {{- if .Values.accounts.labels.tier }}
+    tier: {{ .Values.accounts.labels.tier }}
+    {{- end }}
 spec:
   replicas: {{ .Values.accounts.replicaCount }}
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "accounts" "context" .) | nindent 6 }}
+      app: {{ .Values.accounts.labels.app }}
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "accounts" "context" .) | nindent 8 }}
+        app: {{ .Values.accounts.labels.app }}
+        {{- if .Values.accounts.labels.tier }}
+        tier: {{ .Values.accounts.labels.tier }}
+        {{- end }}
     spec:
       containers:
       - name: accounts
-        image: {{ include "eazybank.image" (dict "repository" .Values.accounts.image.repository "tag" .Values.accounts.image.tag "context" .) }}
+        image: {{ .Values.accounts.image.repository }}:{{ .Values.accounts.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.accounts.containerPort }}
         env:
-        {{- include "eazybank.springboot.env" . | nindent 8 }}
-        {{- include "eazybank.resources" .Values.accounts.resources | nindent 8 }}
-        {{- include "eazybank.springboot.livenessProbe" (dict "path" .Values.accounts.probes.liveness.path "port" .Values.accounts.containerPort "initialDelay" .Values.accounts.probes.liveness.initialDelaySeconds "period" .Values.accounts.probes.liveness.periodSeconds "timeout" .Values.accounts.probes.liveness.timeoutSeconds "failureThreshold" .Values.accounts.probes.liveness.failureThreshold) | nindent 8 }}
-        {{- include "eazybank.springboot.readinessProbe" (dict "path" .Values.accounts.probes.readiness.path "port" .Values.accounts.containerPort "initialDelay" .Values.accounts.probes.readiness.initialDelaySeconds "period" .Values.accounts.probes.readiness.periodSeconds "timeout" .Values.accounts.probes.readiness.timeoutSeconds "failureThreshold" .Values.accounts.probes.readiness.failureThreshold) | nindent 8 }}
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_PROFILES_ACTIVE
+        - name: SPRING_CONFIG_IMPORT
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_CONFIG_IMPORT
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        - name: SPRING_RABBITMQ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_RABBITMQ_HOST
+        - name: SPRING_CLOUD_STREAM_DEFAULT-BINDER
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_CLOUD_STREAM_DEFAULT-BINDER
+        resources:
+          limits:
+            memory: {{ .Values.accounts.resources.limits.memory }}
+          requests:
+            memory: {{ .Values.accounts.resources.requests.memory }}
+            cpu: {{ .Values.accounts.resources.requests.cpu }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.accounts.probes.liveness.path }}
+            port: {{ .Values.accounts.containerPort }}
+          initialDelaySeconds: {{ .Values.accounts.probes.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.accounts.probes.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.accounts.probes.liveness.timeoutSeconds }}
+          failureThreshold: {{ .Values.accounts.probes.liveness.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.accounts.probes.readiness.path }}
+            port: {{ .Values.accounts.containerPort }}
+          initialDelaySeconds: {{ .Values.accounts.probes.readiness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.accounts.probes.readiness.periodSeconds }}
+          timeoutSeconds: {{ .Values.accounts.probes.readiness.timeoutSeconds }}
+          failureThreshold: {{ .Values.accounts.probes.readiness.failureThreshold }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: accounts
+  name: {{ .Values.accounts.service.name }}
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "accounts" "context" .) | nindent 4 }}
+    app: {{ .Values.accounts.labels.app }}
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "accounts" "context" .) | nindent 4 }}
+    app: {{ .Values.accounts.labels.app }}
   type: {{ .Values.accounts.service.type }}
   ports:
     - protocol: TCP
+      name: http
       port: {{ .Values.accounts.service.port }}
       targetPort: {{ .Values.accounts.containerPort }}
 {{- end }}

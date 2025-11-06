@@ -1,29 +1,25 @@
 {{- if .Values.message.enabled }}
-{{/*
-Message Microservice
-Handles asynchronous message processing via RabbitMQ
-Demonstrates event-driven architecture patterns
-*/}}
+# Message Service - handles async message processing via RabbitMQ
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: message
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "message" "context" .) | nindent 4 }}
+    app: message
 spec:
   replicas: {{ .Values.message.replicaCount }}
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "message" "context" .) | nindent 6 }}
+      app: message
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "message" "context" .) | nindent 8 }}
+        app: message
     spec:
       containers:
       - name: message
-        image: {{ include "eazybank.image" (dict "repository" .Values.message.image.repository "tag" .Values.message.image.tag "context" .) }}
+        image: {{ .Values.message.image.repository }}:{{ .Values.message.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.message.containerPort }}
@@ -31,19 +27,24 @@ spec:
         - name: SPRING_RABBITMQ_HOST
           valueFrom:
             configMapKeyRef:
-              name: {{ include "eazybank.fullname" . }}-config
+              name: eazybank-configmap
               key: SPRING_RABBITMQ_HOST
-        {{- include "eazybank.resources" .Values.message.resources | nindent 8 }}
+        resources:
+          limits:
+            memory: {{ .Values.message.resources.limits.memory }}
+          requests:
+            memory: {{ .Values.message.resources.requests.memory }}
+            cpu: {{ .Values.message.resources.requests.cpu }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: message
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "message" "context" .) | nindent 4 }}
+    app: message
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "message" "context" .) | nindent 4 }}
+    app: message
   type: {{ .Values.message.service.type }}
   ports:
     - protocol: TCP

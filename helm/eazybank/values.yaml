@@ -9,16 +9,6 @@ global:
   # Image registry prefix - useful for private registries
   imageRegistry: ""
 
-  # Default resource limits and requests for microservices
-  resources:
-    limits:
-      memory: "700Mi"
-    requests:
-      memory: "512Mi"
-      cpu: "250m"
-
-# ============================================================================
-# Common ConfigMap Values
 # Centralized configuration for all microservices
 # ============================================================================
 config:
@@ -78,6 +68,12 @@ config:
     transactionStateLogReplicationFactor: "1"
     processRoles: "broker,controller"
     nodeId: "1"
+    controllerQuorumVoters: "1@kafka:29093"
+    listeners: "PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://kafka:9092"
+    interBrokerListenerName: "PLAINTEXT"
+    controllerListenerNames: "CONTROLLER"
+    logDirs: "/tmp/kraft-combined-logs"
+    clusterId: "MkU3OEVBNTcwNTJENDM2Qk"
 
 # ============================================================================
 # Infrastructure Components
@@ -157,11 +153,16 @@ mysql:
 # Config Server - centralized configuration management
 configserver:
   enabled: true
+  name: configserver
   replicaCount: 1
+  labels:
+    app: configserver
+    tier: infrastructure
   image:
     repository: ghergutmadalin/configserver
     tag: latest
   service:
+    name: configserver
     type: ClusterIP
     port: 8071
   containerPort: 8071
@@ -186,11 +187,16 @@ configserver:
 # Eureka Server - service discovery
 eurekaserver:
   enabled: true
+  name: eurekaserver
   replicaCount: 1
+  labels:
+    app: eurekaserver
+    tier: infrastructure
   image:
     repository: ghergutmadalin/eurekaserver
     tag: latest
   service:
+    name: eurekaserver
     type: ClusterIP
     port: 8761
   containerPort: 8761
@@ -215,11 +221,16 @@ eurekaserver:
 # Gateway Server - API Gateway with routing and filtering
 gatewayserver:
   enabled: true
+  name: gatewayserver
   replicaCount: 1
+  labels:
+    app: gatewayserver
+    tier: gateway
   image:
     repository: ghergutmadalin/gatewayserver
     tag: latest
   service:
+    name: gatewayserver
     # LoadBalancer for external access, change to ClusterIP + Ingress in production
     type: LoadBalancer
     port: 8072
@@ -253,11 +264,16 @@ gatewayserver:
 # Accounts microservice
 accounts:
   enabled: true
+  name: accounts
   replicaCount: 1
+  labels:
+    app: accounts
+    tier: backend
   image:
     repository: ghergutmadalin/accounts
     tag: latest
   service:
+    name: accounts
     type: ClusterIP
     port: 8080
   containerPort: 8080
@@ -285,11 +301,16 @@ accounts:
 # Loans microservice
 loans:
   enabled: true
+  name: loans
   replicaCount: 1
+  labels:
+    app: loans
+    tier: backend
   image:
     repository: ghergutmadalin/loans
     tag: latest
   service:
+    name: loans
     type: ClusterIP
     port: 8090
   containerPort: 8090
@@ -316,11 +337,16 @@ loans:
 # Cards microservice
 cards:
   enabled: true
+  name: cards
   replicaCount: 1
+  labels:
+    app: cards
+    tier: backend
   image:
     repository: ghergutmadalin/cards
     tag: latest
   service:
+    name: cards
     type: ClusterIP
     port: 9000
   containerPort: 9000

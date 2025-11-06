@@ -1,62 +1,86 @@
 {{- if .Values.gatewayserver.enabled }}
-{{/*
-Spring Cloud Gateway Server
-API Gateway providing routing, rate limiting, and circuit breaking
-Acts as single entry point for all client requests
-*/}}
+# Gateway Server - API Gateway (main entry point for all requests)
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gatewayserver
+  name: {{ .Values.gatewayserver.service.name }}
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "gatewayserver" "context" .) | nindent 4 }}
+    app: {{ .Values.gatewayserver.labels.app }}
+    {{- if .Values.gatewayserver.labels.tier }}
+    tier: {{ .Values.gatewayserver.labels.tier }}
+    {{- end }}
 spec:
   replicas: {{ .Values.gatewayserver.replicaCount }}
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "gatewayserver" "context" .) | nindent 6 }}
+      app: {{ .Values.gatewayserver.labels.app }}
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "gatewayserver" "context" .) | nindent 8 }}
+        app: {{ .Values.gatewayserver.labels.app }}
+        {{- if .Values.gatewayserver.labels.tier }}
+        tier: {{ .Values.gatewayserver.labels.tier }}
+        {{- end }}
     spec:
       containers:
       - name: gatewayserver
-        image: {{ include "eazybank.image" (dict "repository" .Values.gatewayserver.image.repository "tag" .Values.gatewayserver.image.tag "context" .) }}
+        image: {{ .Values.gatewayserver.image.repository }}:{{ .Values.gatewayserver.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.gatewayserver.containerPort }}
         env:
-        {{- include "eazybank.springboot.env" . | nindent 8 }}
-        {{- include "eazybank.resources" .Values.gatewayserver.resources | nindent 8 }}
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_PROFILES_ACTIVE
+        - name: SPRING_CONFIG_IMPORT
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_CONFIG_IMPORT
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        - name: SPRING_RABBITMQ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_RABBITMQ_HOST
+        resources:
+          limits:
+            memory: {{ .Values.gatewayserver.resources.limits.memory }}
+          requests:
+            memory: {{ .Values.gatewayserver.resources.requests.memory }}
+            cpu: {{ .Values.gatewayserver.resources.requests.cpu }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: gatewayserver
+  name: {{ .Values.gatewayserver.service.name }}
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "gatewayserver" "context" .) | nindent 4 }}
+    app: {{ .Values.gatewayserver.labels.app }}
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "gatewayserver" "context" .) | nindent 4 }}
+    app: {{ .Values.gatewayserver.labels.app }}
   type: {{ .Values.gatewayserver.service.type }}
   ports:
     - protocol: TCP
+      name: http
       port: {{ .Values.gatewayserver.service.port }}
       targetPort: {{ .Values.gatewayserver.containerPort }}
 ---
 {{- if .Values.gatewayserver.ingress.enabled }}
-{{/*
-Ingress for production environments
-Provides external HTTPS access with TLS termination
-*/}}
+# Ingress - for production external access with TLS
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: gatewayserver
+  name: {{ .Values.gatewayserver.service.name }}
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "gatewayserver" "context" .) | nindent 4 }}
+    app: {{ .Values.gatewayserver.labels.app }}
   {{- with .Values.gatewayserver.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -85,7 +109,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: gatewayserver
+                name: {{ $.Values.gatewayserver.service.name }}
                 port:
                   number: {{ $.Values.gatewayserver.service.port }}
           {{- end }}

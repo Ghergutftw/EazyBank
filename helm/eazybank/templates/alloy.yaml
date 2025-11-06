@@ -1,0 +1,235 @@
+{{- if .Values.alloy.enabled }}
+{{/*
+Grafana Alloy - Telemetry Pipeline
+Collects logs and metrics from Kubernetes pods and sends to Loki and Prometheus
+Requires RBAC permissions to discover pods
+*/}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alloy
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: alloy
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: alloy
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: alloy
+subjects:
+- kind: ServiceAccount
+  name: alloy
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+data:
+  config.alloy: |
+    // Kubernetes service discovery for logs
+    discovery.kubernetes "pods" {
+      role = "pod"
+    }
+
+    discovery.relabel "pods" {
+      targets = discovery.kubernetes.pods.targets
+
+      // Keep only pods with specific labels (microservices)
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app"]
+        regex = "(accounts|loans|cards|configserver|eurekaserver|gatewayserver)"
+        action = "keep"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label = "pod"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label = "namespace"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app"]
+        target_label = "service"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label = "container"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_node_name"]
+        target_label = "node"
+      }
+    }
+
+    loki.source.kubernetes "pods" {
+      targets    = discovery.relabel.pods.output
+      forward_to = [loki.write.default.receiver]
+    }
+
+    loki.write "default" {
+      endpoint {
+        url = "http://loki-gateway:3100/loki/api/v1/push"
+        tenant_id = "tenant1"
+      }
+      external_labels = {
+        cluster = "eazybank-microservices",
+      }
+    }
+
+    // Prometheus metrics scraping for microservices
+    discovery.kubernetes "prometheus_pods" {
+      role = "pod"
+    }
+
+    discovery.relabel "prometheus_pods" {
+      targets = discovery.kubernetes.prometheus_pods.targets
+
+      // Only scrape pods with actuator endpoints (Spring Boot microservices)
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app"]
+        regex = "(accounts|loans|cards|configserver|eurekaserver|gatewayserver)"
+        action = "keep"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label = "pod"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app"]
+        target_label = "service"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label = "container"
+      }
+
+      rule {
+        source_labels = ["__address__"]
+        regex = "(.*):(.*)"
+        replacement = "${1}:8080"
+        target_label = "__address__"
+        action = "replace"
+      }
+
+      rule {
+        target_label = "__metrics_path__"
+        replacement = "/actuator/prometheus"
+      }
+    }
+
+    prometheus.scrape "microservices" {
+      targets = discovery.relabel.prometheus_pods.output
+      forward_to = [prometheus.remote_write.default.receiver]
+      scrape_interval = "15s"
+      metrics_path = "/actuator/prometheus"
+    }
+
+    prometheus.remote_write "default" {
+      endpoint {
+        url = "http://prometheus:9090/api/v1/write"
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alloy
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "eazybank.microservice.selectorLabels" (dict "name" "alloy" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "eazybank.microservice.selectorLabels" (dict "name" "alloy" "context" .) | nindent 8 }}
+    spec:
+      serviceAccountName: alloy
+      containers:
+      - name: alloy
+        image: {{ .Values.alloy.image.repository }}:{{ .Values.alloy.image.tag | default "latest" }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        args:
+        - run
+        - --server.http.listen-addr=0.0.0.0:12345
+        - --storage.path=/var/lib/alloy/data
+        - /etc/alloy/config.alloy
+        ports:
+        - containerPort: 12345
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+          readOnly: true
+        - name: docker-containers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: alloy-config
+          mountPath: /etc/alloy
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: docker-containers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: alloy-config
+        configMap:
+          name: alloy-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alloy
+  labels:
+    {{- include "eazybank.microservice.labels" (dict "name" "alloy" "context" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "eazybank.microservice.selectorLabels" (dict "name" "alloy" "context" .) | nindent 4 }}
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 12345
+      targetPort: 12345
+{{- end }}
+

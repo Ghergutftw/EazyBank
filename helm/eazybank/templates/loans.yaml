@@ -1,46 +1,92 @@
 {{- if .Values.loans.enabled }}
-{{/*
-Loans Microservice
-Manages customer loan operations
-*/}}
+# Loans Microservice - manages customer loan operations
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: loans
+  name: {{ .Values.loans.name }}
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loans" "context" .) | nindent 4 }}
+    app: {{ .Values.loans.labels.app }}
+    {{- if .Values.loans.labels.tier }}
+    tier: {{ .Values.loans.labels.tier }}
+    {{- end }}
 spec:
   replicas: {{ .Values.loans.replicaCount }}
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "loans" "context" .) | nindent 6 }}
+      app: {{ .Values.loans.labels.app }}
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "loans" "context" .) | nindent 8 }}
+        app: {{ .Values.loans.labels.app }}
+        {{- if .Values.loans.labels.tier }}
+        tier: {{ .Values.loans.labels.tier }}
+        {{- end }}
     spec:
       containers:
       - name: loans
-        image: {{ include "eazybank.image" (dict "repository" .Values.loans.image.repository "tag" .Values.loans.image.tag "context" .) }}
+        image: {{ .Values.loans.image.repository }}:{{ .Values.loans.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.loans.containerPort }}
         env:
-        {{- include "eazybank.springboot.env" . | nindent 8 }}
-        {{- include "eazybank.resources" .Values.loans.resources | nindent 8 }}
-        {{- include "eazybank.springboot.livenessProbe" (dict "path" .Values.loans.probes.liveness.path "port" .Values.loans.containerPort "initialDelay" .Values.loans.probes.liveness.initialDelaySeconds "period" .Values.loans.probes.liveness.periodSeconds "timeout" .Values.loans.probes.liveness.timeoutSeconds "failureThreshold" .Values.loans.probes.liveness.failureThreshold) | nindent 8 }}
-        {{- include "eazybank.springboot.readinessProbe" (dict "path" .Values.loans.probes.readiness.path "port" .Values.loans.containerPort "initialDelay" .Values.loans.probes.readiness.initialDelaySeconds "period" .Values.loans.probes.readiness.periodSeconds "timeout" .Values.loans.probes.readiness.timeoutSeconds "failureThreshold" .Values.loans.probes.readiness.failureThreshold) | nindent 8 }}
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_PROFILES_ACTIVE
+        - name: SPRING_CONFIG_IMPORT
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_CONFIG_IMPORT
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+        - name: SPRING_RABBITMQ_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_RABBITMQ_HOST
+        - name: SPRING_CLOUD_STREAM_DEFAULT-BINDER
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: SPRING_CLOUD_STREAM_DEFAULT-BINDER
+        resources:
+          limits:
+            memory: {{ .Values.loans.resources.limits.memory }}
+          requests:
+            memory: {{ .Values.loans.resources.requests.memory }}
+            cpu: {{ .Values.loans.resources.requests.cpu }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.loans.probes.liveness.path }}
+            port: {{ .Values.loans.containerPort }}
+          initialDelaySeconds: {{ .Values.loans.probes.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.loans.probes.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.loans.probes.liveness.timeoutSeconds }}
+          failureThreshold: {{ .Values.loans.probes.liveness.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.loans.probes.readiness.path }}
+            port: {{ .Values.loans.containerPort }}
+          initialDelaySeconds: {{ .Values.loans.probes.readiness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.loans.probes.readiness.periodSeconds }}
+          timeoutSeconds: {{ .Values.loans.probes.readiness.timeoutSeconds }}
+          failureThreshold: {{ .Values.loans.probes.readiness.failureThreshold }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: loans
+  name: {{ .Values.loans.service.name }}
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loans" "context" .) | nindent 4 }}
+    app: {{ .Values.loans.labels.app }}
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "loans" "context" .) | nindent 4 }}
+    app: {{ .Values.loans.labels.app }}
   type: {{ .Values.loans.service.type }}
   ports:
     - protocol: TCP

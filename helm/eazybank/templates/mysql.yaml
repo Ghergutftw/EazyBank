@@ -1,7 +1,4 @@
-{{/*
-MySQL Database Instances
-Each microservice has its own database following microservices best practices
-*/}}
+# MySQL Databases - each microservice has its own database
 
 {{- if .Values.mysql.accountsdb.enabled }}
 ---
@@ -10,37 +7,61 @@ kind: Deployment
 metadata:
   name: accountsdb
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "accountsdb" "context" .) | nindent 4 }}
+    app: accountsdb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "accountsdb" "context" .) | nindent 6 }}
+      app: accountsdb
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "accountsdb" "context" .) | nindent 8 }}
+        app: accountsdb
     spec:
       containers:
       - name: accountsdb
-        image: {{ include "eazybank.image" (dict "repository" .Values.mysql.accountsdb.image.repository "tag" .Values.mysql.accountsdb.image.tag "context" .) }}
+        image: {{ .Values.mysql.accountsdb.image.repository }}:{{ .Values.mysql.accountsdb.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.mysql.accountsdb.service.port }}
         env:
-        {{- include "eazybank.mysql.env" (dict "database" .Values.mysql.accountsdb.database "context" .) | nindent 8 }}
-        {{- include "eazybank.mysql.livenessProbe" .Values.mysql.accountsdb.probes | nindent 8 }}
-        {{- include "eazybank.mysql.readinessProbe" .Values.mysql.accountsdb.probes | nindent 8 }}
+        - name: MYSQL_DATABASE
+          value: {{ .Values.mysql.accountsdb.database | quote }}
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: MYSQL_ROOT_PASSWORD
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: {{ .Values.mysql.accountsdb.probes.initialDelaySeconds }}
+          periodSeconds: {{ .Values.mysql.accountsdb.probes.periodSeconds }}
+          timeoutSeconds: {{ .Values.mysql.accountsdb.probes.timeoutSeconds }}
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: {{ .Values.mysql.accountsdb.probes.initialDelaySeconds }}
+          periodSeconds: {{ .Values.mysql.accountsdb.probes.periodSeconds }}
+          timeoutSeconds: {{ .Values.mysql.accountsdb.probes.timeoutSeconds }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: accountsdb
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "accountsdb" "context" .) | nindent 4 }}
+    app: accountsdb
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "accountsdb" "context" .) | nindent 4 }}
+    app: accountsdb
   type: {{ .Values.mysql.accountsdb.service.type }}
   ports:
     - protocol: TCP
@@ -55,37 +76,61 @@ kind: Deployment
 metadata:
   name: loansdb
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loansdb" "context" .) | nindent 4 }}
+    app: loansdb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "loansdb" "context" .) | nindent 6 }}
+      app: loansdb
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "loansdb" "context" .) | nindent 8 }}
+        app: loansdb
     spec:
       containers:
       - name: loansdb
-        image: {{ include "eazybank.image" (dict "repository" .Values.mysql.loansdb.image.repository "tag" .Values.mysql.loansdb.image.tag "context" .) }}
+        image: {{ .Values.mysql.loansdb.image.repository }}:{{ .Values.mysql.loansdb.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.mysql.loansdb.service.port }}
         env:
-        {{- include "eazybank.mysql.env" (dict "database" .Values.mysql.loansdb.database "context" .) | nindent 8 }}
-        {{- include "eazybank.mysql.livenessProbe" .Values.mysql.loansdb.probes | nindent 8 }}
-        {{- include "eazybank.mysql.readinessProbe" .Values.mysql.loansdb.probes | nindent 8 }}
+        - name: MYSQL_DATABASE
+          value: {{ .Values.mysql.loansdb.database | quote }}
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: MYSQL_ROOT_PASSWORD
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: {{ .Values.mysql.loansdb.probes.initialDelaySeconds }}
+          periodSeconds: {{ .Values.mysql.loansdb.probes.periodSeconds }}
+          timeoutSeconds: {{ .Values.mysql.loansdb.probes.timeoutSeconds }}
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: {{ .Values.mysql.loansdb.probes.initialDelaySeconds }}
+          periodSeconds: {{ .Values.mysql.loansdb.probes.periodSeconds }}
+          timeoutSeconds: {{ .Values.mysql.loansdb.probes.timeoutSeconds }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: loansdb
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "loansdb" "context" .) | nindent 4 }}
+    app: loansdb
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "loansdb" "context" .) | nindent 4 }}
+    app: loansdb
   type: {{ .Values.mysql.loansdb.service.type }}
   ports:
     - protocol: TCP
@@ -100,37 +145,61 @@ kind: Deployment
 metadata:
   name: cardsdb
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "cardsdb" "context" .) | nindent 4 }}
+    app: cardsdb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "eazybank.microservice.selectorLabels" (dict "name" "cardsdb" "context" .) | nindent 6 }}
+      app: cardsdb
   template:
     metadata:
       labels:
-        {{- include "eazybank.microservice.selectorLabels" (dict "name" "cardsdb" "context" .) | nindent 8 }}
+        app: cardsdb
     spec:
       containers:
       - name: cardsdb
-        image: {{ include "eazybank.image" (dict "repository" .Values.mysql.cardsdb.image.repository "tag" .Values.mysql.cardsdb.image.tag "context" .) }}
+        image: {{ .Values.mysql.cardsdb.image.repository }}:{{ .Values.mysql.cardsdb.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
         ports:
         - containerPort: {{ .Values.mysql.cardsdb.service.port }}
         env:
-        {{- include "eazybank.mysql.env" (dict "database" .Values.mysql.cardsdb.database "context" .) | nindent 8 }}
-        {{- include "eazybank.mysql.livenessProbe" .Values.mysql.cardsdb.probes | nindent 8 }}
-        {{- include "eazybank.mysql.readinessProbe" .Values.mysql.cardsdb.probes | nindent 8 }}
+        - name: MYSQL_DATABASE
+          value: {{ .Values.mysql.cardsdb.database | quote }}
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: eazybank-configmap
+              key: MYSQL_ROOT_PASSWORD
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: {{ .Values.mysql.cardsdb.probes.initialDelaySeconds }}
+          periodSeconds: {{ .Values.mysql.cardsdb.probes.periodSeconds }}
+          timeoutSeconds: {{ .Values.mysql.cardsdb.probes.timeoutSeconds }}
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: {{ .Values.mysql.cardsdb.probes.initialDelaySeconds }}
+          periodSeconds: {{ .Values.mysql.cardsdb.probes.periodSeconds }}
+          timeoutSeconds: {{ .Values.mysql.cardsdb.probes.timeoutSeconds }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: cardsdb
   labels:
-    {{- include "eazybank.microservice.labels" (dict "name" "cardsdb" "context" .) | nindent 4 }}
+    app: cardsdb
 spec:
   selector:
-    {{- include "eazybank.microservice.selectorLabels" (dict "name" "cardsdb" "context" .) | nindent 4 }}
+    app: cardsdb
   type: {{ .Values.mysql.cardsdb.service.type }}
   ports:
     - protocol: TCP

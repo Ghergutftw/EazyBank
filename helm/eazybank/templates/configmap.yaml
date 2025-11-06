@@ -1,13 +1,10 @@
-{{/*
-ConfigMap containing all shared configuration for EazyBank microservices
-This follows the 12-factor app methodology by externalizing configuration
-*/}}
+# ConfigMap - shared configuration for all EazyBank microservices
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "eazybank.fullname" . }}-config
   labels:
-    {{- include "eazybank.labels" . | nindent 4 }}
+    app: eazybank
 data:
   # ============================================================================
   # Spring Boot Application Configuration
@@ -86,5 +83,11 @@ data:
   KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: {{ .Values.config.kafka.transactionStateLogReplicationFactor | quote }}
   KAFKA_PROCESS_ROLES: {{ .Values.config.kafka.processRoles | quote }}
   KAFKA_NODE_ID: {{ .Values.config.kafka.nodeId | quote }}
+  KAFKA_CONTROLLER_QUORUM_VOTERS: {{ .Values.config.kafka.controllerQuorumVoters | quote }}
+  KAFKA_LISTENERS: {{ .Values.config.kafka.listeners | quote }}
+  KAFKA_INTER_BROKER_LISTENER_NAME: {{ .Values.config.kafka.interBrokerListenerName | quote }}
+  KAFKA_CONTROLLER_LISTENER_NAMES: {{ .Values.config.kafka.controllerListenerNames | quote }}
+  KAFKA_LOG_DIRS: {{ .Values.config.kafka.logDirs | quote }}
+  CLUSTER_ID: {{ .Values.config.kafka.clusterId | quote }}
   {{- end }}
 
