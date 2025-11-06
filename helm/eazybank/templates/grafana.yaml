@@ -32,9 +32,9 @@ data:
           httpHeaderName1: "X-Scope-OrgID"
           derivedFields:
             - datasourceUid: tempo
-              matcherRegex: "\[.+,(.+),.+\]"
+              matcherRegex: '\[.+,(.+),.+\]'
               name: TraceID
-              url: '${__value.raw}'
+              url: '$${__value.raw}'
         secureJsonData:
           httpHeaderValue1: "tenant1"
       {{- end }}
