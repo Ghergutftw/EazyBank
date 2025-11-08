@@ -48,9 +48,7 @@ kubectl port-forward svc/gatewayserver 8072:8072
 # Check all pods are running
 kubectl get pods
 
-# Check Eureka Server (port-forward)
-kubectl port-forward svc/eurekaserver 8761:8761
-# Visit: http://localhost:8761
+
 
 # Check RabbitMQ Management
 kubectl port-forward svc/rabbitmq 15672:15672
@@ -158,14 +156,6 @@ kubectl port-forward svc/cards 9000:9000
 curl http://localhost:9000/actuator/health
 ```
 
-### 2. Service Discovery
-
-```bash
-# Check Eureka dashboard
-kubectl port-forward svc/eurekaserver 8761:8761
-# Visit: http://localhost:8761
-# Verify all services are registered
-```
 
 ### 3. API Gateway
 

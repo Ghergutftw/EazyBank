@@ -68,7 +68,7 @@ data:
       // Keep only pods with specific labels (microservices)
       rule {
         source_labels = ["__meta_kubernetes_pod_label_app"]
-        regex = "(accounts|loans|cards|configserver|eurekaserver|gatewayserver)"
+        regex = "(accounts|loans|cards|configserver|gatewayserver)"
         action = "keep"
       }
 
@@ -124,7 +124,7 @@ data:
       // Only scrape pods with actuator endpoints (Spring Boot microservices)
       rule {
         source_labels = ["__meta_kubernetes_pod_label_app"]
-        regex = "(accounts|loans|cards|configserver|eurekaserver|gatewayserver)"
+        regex = "(accounts|loans|cards|configserver|gatewayserver)"
         action = "keep"
       }
 

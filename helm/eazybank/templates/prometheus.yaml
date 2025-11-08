@@ -38,12 +38,6 @@ data:
         static_configs:
           - targets: [ 'gatewayserver:{{ .Values.gatewayserver.service.port }}' ]
       {{- end }}
-      {{- if .Values.eurekaserver.enabled }}
-      - job_name: 'eurekaserver'
-        metrics_path: '/actuator/prometheus'
-        static_configs:
-          - targets: [ 'eurekaserver:{{ .Values.eurekaserver.service.port }}' ]
-      {{- end }}
       {{- if .Values.configserver.enabled }}
       - job_name: 'configserver'
         metrics_path: '/actuator/prometheus'

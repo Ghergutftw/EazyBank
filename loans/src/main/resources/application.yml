@@ -1,6 +1,110 @@
+build:
+  version: "3.0"
+
+server:
+  port: 8090
+
 spring:
+  cloud:
+    #IMPORTANT
+    kubernetes:
+      discovery:
+        all-namespaces: true
+        discovery-server-url: http://spring-cloud-kubernetes-discovery:80
+    openfeign:
+      circuitbreaker:
+        enabled: true
+  datasource:
+    url: jdbc:mysql://loansdb:3306/loansdb
+    username: root
+    password: root
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: always
+  jackson:
+    default-property-inclusion: NON_NULL
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
   application:
     name: loans
-  config:
-    import: configserver:http://configserver:8071/
 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /actuator
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+    shutdown:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+loans:
+  message: "Welcome to EazyBank loans related default APIs"
+  max-transaction-limit: 50000
+  allowed-currencies: "USD,EUR,GBP"
+  feature-flags:
+    mobile-payments-enabled: true
+    international-transfers: false
+  contactDetails:
+    name: "John Doe - Developer"
+    email: "john@eazybank.com"
+    onCallSupport:
+      - "(555) 555-1234"
+      - "(555) 523-1345"
+
+logging:
+  level:
+    com.eazybank: INFO
+    com.netflix.eureka: WARN
+    org.springframework.web: WARN
+    root: INFO
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
+external-apis:
+  fraud-detection:
+    url: http://fraud-service:8080
+    timeout: 5000
+  notification-service:
+    url: http://notification-service:8080
+    timeout: 3000
+
+info:
+  app:
+    name: "loans"
+    description: "EazyBank Loans Application default"
+    version: "@project.version@"
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        failureRateThreshold: 50
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10

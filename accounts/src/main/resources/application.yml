@@ -1,6 +1,128 @@
+build:
+  version: "3.0"
+
+server:
+  port: 8080
+
+
 spring:
+  cloud:
+    #IMPORTANT
+    kubernetes:
+      discovery:
+        all-namespaces: true
+        discovery-server-url: http://spring-cloud-kubernetes-discovery:80
+    functions:
+      definition: updateCommunication
+    stream:
+      bindings:
+        updateCommunication-in-0:
+          destination: communication-sent
+          group: ${spring.application.name}
+        sendCommunication-out-0:
+          destination: send-communication
+      kafka:
+        binder:
+          brokers:
+            - kafka:9092
+    openfeign:
+      circuitbreaker:
+        enabled: true
+  datasource:
+    url: jdbc:mysql://accountsdb:3306/accountsdb
+    username: root
+    password: root
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: always
+  jackson:
+    default-property-inclusion: NON_NULL
   application:
     name: accounts
-  config:
-    import: configserver:http://configserver:8071/
 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /actuator
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+    shutdown:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+accounts:
+  message: "Welcome to EazyBank accounts related default Docker APIs"
+  max-transaction-limit: 50000
+  allowed-currencies: "USD,EUR,GBP"
+  feature-flags:
+    mobile-payments-enabled: true
+    international-transfers: false
+  contactDetails:
+    name: "John Doe - Developer"
+    email: "john@eazybank.com"
+    onCallSupport:
+      - "(555) 555-1234"
+      - "(555) 523-1345"
+
+logging:
+  level:
+    com.eazybank: INFO
+    com.netflix.eureka: WARN
+    org.springframework.web: WARN
+    root: INFO
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
+info:
+  app:
+    name: "accounts"
+    description: "EazyBank Accounts Application Default"
+    version: "@project.version@"
+
+resilience4j:
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 10
+        limit-refresh-period: 5000ms
+        timeout-duration: 1000ms
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 2s
+        exponential-backoff-multiplier: 2
+        enableExponentialBackoff: true
+        retryExceptions:
+          - java.io.IOException
+        ignoreExceptions:
+          - java.lang.NullPointerException
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        failureRateThreshold: 50
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10

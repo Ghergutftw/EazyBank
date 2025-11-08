@@ -57,7 +57,7 @@
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <artifactId>spring-cloud-starter-kubernetes-discoveryclient</artifactId>
         </dependency>
 
         <dependency>
@@ -128,7 +128,7 @@
                         <image>eclipse-temurin:21-jre</image>
                     </from>
                     <to>
-                        <image>ghergutmadalin/${project.artifactId}:latest</image>
+                        <image>ghergutmadalin/${project.artifactId}:s17</image>
                     </to>
                 </configuration>
             </plugin>

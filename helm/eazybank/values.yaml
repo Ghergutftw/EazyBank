@@ -18,8 +18,7 @@ config:
   # Config Server URL
   springConfigImport: "configserver:http://configserver:8071/"
 
-  # Eureka Server URL for service discovery
-  eurekaClientServiceUrl: "http://eurekaserver:8761/eureka/"
+
 
   # RabbitMQ configuration
   rabbitmq:
@@ -160,7 +159,7 @@ configserver:
     tier: infrastructure
   image:
     repository: ghergutmadalin/configserver
-    tag: latest
+    tag: s17
   service:
     name: configserver
     type: ClusterIP
@@ -184,39 +183,7 @@ configserver:
       periodSeconds: 10
       timeoutSeconds: 5
 
-# Eureka Server - service discovery
-eurekaserver:
-  enabled: true
-  name: eurekaserver
-  replicaCount: 1
-  labels:
-    app: eurekaserver
-    tier: infrastructure
-  image:
-    repository: ghergutmadalin/eurekaserver
-    tag: latest
-  service:
-    name: eurekaserver
-    type: ClusterIP
-    port: 8761
-  containerPort: 8761
-  resources:
-    limits:
-      memory: "700Mi"
-    requests:
-      memory: "512Mi"
-      cpu: "250m"
-  probes:
-    liveness:
-      path: /actuator/health/readiness
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      timeoutSeconds: 5
-    readiness:
-      path: /actuator/health/readiness
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      timeoutSeconds: 5
+
 
 # Gateway Server - API Gateway with routing and filtering
 gatewayserver:
@@ -228,7 +195,7 @@ gatewayserver:
     tier: gateway
   image:
     repository: ghergutmadalin/gatewayserver
-    tag: latest
+    tag: s17
   service:
     name: gatewayserver
     # LoadBalancer for external access, change to ClusterIP + Ingress in production
@@ -265,13 +232,13 @@ gatewayserver:
 accounts:
   enabled: true
   name: accounts
-  replicaCount: 1
+  replicaCount: 2
   labels:
     app: accounts
     tier: backend
   image:
     repository: ghergutmadalin/accounts
-    tag: latest
+    tag: s17
   service:
     name: accounts
     type: ClusterIP
@@ -308,7 +275,7 @@ loans:
     tier: backend
   image:
     repository: ghergutmadalin/loans
-    tag: latest
+    tag: s17
   service:
     name: loans
     type: ClusterIP
@@ -344,7 +311,7 @@ cards:
     tier: backend
   image:
     repository: ghergutmadalin/cards
-    tag: latest
+    tag: s17
   service:
     name: cards
     type: ClusterIP
@@ -376,7 +343,7 @@ message:
   replicaCount: 1
   image:
     repository: ghergutmadalin/message
-    tag: latest
+    tag: s17
   service:
     type: ClusterIP
     port: 9010

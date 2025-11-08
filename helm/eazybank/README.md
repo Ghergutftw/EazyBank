@@ -12,7 +12,6 @@ The EazyBank platform consists of:
 
 ### Spring Cloud Infrastructure
 - **Config Server**: Centralized configuration management
-- **Eureka Server**: Service registry and discovery
 - **Gateway Server**: API Gateway with routing, rate limiting, and circuit breaking
 
 ### Business Microservices

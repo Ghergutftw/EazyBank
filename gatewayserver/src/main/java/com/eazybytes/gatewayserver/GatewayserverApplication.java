@@ -2,6 +2,7 @@ package com.eazybytes.gatewayserver;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 @SpringBootApplication
+@EnableDiscoveryClient
 public class GatewayserverApplication {
 
     public static void main(String[] args) {
@@ -43,7 +45,7 @@ public class GatewayserverApplication {
                                 )
 
                         )
-                        .uri("lb://ACCOUNTS")
+                        .uri("http://accounts:8080")
                 )
                 .route(p -> p
                         .path("/eazybank/loans/**")
@@ -65,7 +67,7 @@ public class GatewayserverApplication {
                                         }
                                 )
                         )
-                        .uri("lb://LOANS"))
+                        .uri("http://loans:8090"))
                 .route(p -> p
                         .path("/eazybank/cards/**")
                         .filters(f -> f.rewritePath("/eazybank/cards/(?<segment>.*)", "/${segment}")
@@ -86,7 +88,7 @@ public class GatewayserverApplication {
                                         }
                                 )
                         )
-                        .uri("lb://CARDS")).build();
+                        .uri("http://cards:9000")).build();
         //This has to be with UPPERCASE because it reads the values from eureka where the default is with UPPERCASE
 
     }

@@ -50,14 +50,6 @@ configserver:
       memory: "256Mi"
       cpu: "100m"
 
-eurekaserver:
-  replicaCount: 1
-  resources:
-    limits:
-      memory: "512Mi"
-    requests:
-      memory: "256Mi"
-      cpu: "100m"
 
 # Enable basic monitoring for development (Prometheus + Grafana)
 prometheus:

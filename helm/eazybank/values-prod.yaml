@@ -69,15 +69,6 @@ configserver:
       memory: "768Mi"
       cpu: "250m"
 
-eurekaserver:
-  replicaCount: 2
-  resources:
-    limits:
-      memory: "1Gi"
-      cpu: "500m"
-    requests:
-      memory: "768Mi"
-      cpu: "250m"
 
 # Enable full observability stack for production
 prometheus:

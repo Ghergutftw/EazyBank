@@ -2,7 +2,7 @@
 # Following Helm 3 chart specification
 apiVersion: v2
 name: eazybank
-description: A Helm chart for EazyBank microservices platform with Spring Boot, Eureka, and observability stack
+description: A Helm chart for EazyBank microservices platform with Spring Boot, and observability stack
 type: application
 
 # Chart version - increment this on chart changes
@@ -16,7 +16,6 @@ keywords:
   - microservices
   - spring-boot
   - banking
-  - eureka
   - spring-cloud
 
 # Maintainers information

@@ -15,7 +15,6 @@ data:
   # ============================================================================
   # Service Discovery Configuration
   # ============================================================================
-  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: {{ .Values.config.eurekaClientServiceUrl | quote }}
 
   # ============================================================================
   # Message Broker Configuration
