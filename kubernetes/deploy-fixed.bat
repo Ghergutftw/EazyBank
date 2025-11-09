@@ -3,15 +3,17 @@ kubectl delete secret kubernetes-dashboard-csrf -n kubernetes-dashboard 2>nul
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
 
-echo kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-
-
 echo [2/13] Deploying Dashboard Admin User...
 kubectl apply -f dashboard-adminuser.yaml
 kubectl apply -f dashboard-rolebinding.yaml
 kubectl apply -f secret-adminuser.yaml
-
 kubectl -n kubernetes-dashboard create token admin-user
+
+kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+
+
+
+
 
 echo Dashboard admin user created.
 echo.

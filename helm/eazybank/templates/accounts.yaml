@@ -7,9 +7,6 @@ metadata:
   name: {{ .Values.accounts.service.name }}
   labels:
     app: {{ .Values.accounts.labels.app }}
-    {{- if .Values.accounts.labels.tier }}
-    tier: {{ .Values.accounts.labels.tier }}
-    {{- end }}
 spec:
   replicas: {{ .Values.accounts.replicaCount }}
   selector:
@@ -19,21 +16,8 @@ spec:
     metadata:
       labels:
         app: {{ .Values.accounts.labels.app }}
-        {{- if .Values.accounts.labels.tier }}
-        tier: {{ .Values.accounts.labels.tier }}
-        {{- end }}
     spec:
-      initContainers:
-      - name: wait-for-rabbitmq
-        image: busybox:1.36
-        command: ['sh', '-c', 'until nc -z rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;']
-      - name: wait-for-configserver
-        image: busybox:1.36
-        command: ['sh', '-c', 'until nc -z configserver 8071; do echo waiting for configserver; sleep 2; done;']
-      - name: wait-for-eurekaserver
-        image: busybox:1.36
-        command: ['sh', '-c', 'until nc -z eurekaserver 8761; do echo waiting for eurekaserver; sleep 2; done;']
-      containers:
+     containers:
       - name: accounts
         image: {{ .Values.accounts.image.repository }}:{{ .Values.accounts.image.tag }}
         imagePullPolicy: {{ .Values.global.imagePullPolicy }}
